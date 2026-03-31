@@ -581,10 +581,10 @@ function rDrawWheel(){
     // 텍스트
     ctx.save();ctx.translate(300,300);ctx.rotate(a0+arc/2);
     var txt=rSelected[i];
-    var fs=Math.min(20,Math.max(13,20-Math.floor(txt.length/3)));
-    ctx.font='700 '+fs+'px Segoe UI,sans-serif';
+    var fs=Math.min(26,Math.max(16,26-Math.floor(txt.length/2)));
+    ctx.font='800 '+fs+'px Segoe UI,sans-serif';
     ctx.fillStyle='#fff';ctx.textAlign='right';ctx.textBaseline='middle';
-    ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=5;
+    ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=6;
     var disp=txt.length>10?txt.slice(0,9)+'…':txt;
     ctx.fillText(disp,268,0);
     ctx.restore();
@@ -624,10 +624,10 @@ function rFinish(){
   document.getElementById('r-spin-btn').textContent='🎡 돌리기!';
   document.getElementById('r-spin-btn').disabled=false;
   var n=rSelected.length,arc=2*Math.PI/n;
-  // 포인터는 위쪽(12시) → canvas 기준 -π/2
-  // rAngle만큼 회전했을 때 12시 방향에 해당하는 조각 계산
-  var norm=((-(rAngle - Math.PI/2))%(2*Math.PI)+(2*Math.PI))%(2*Math.PI);
-  var idx=Math.floor(norm/arc)%n;
+  // 포인터는 12시(-π/2). 휠이 rAngle만큼 회전한 상태에서
+  // 포인터 방향에 해당하는 절대각도 = -π/2 - rAngle (휠 좌표계로 변환)
+  var pointerInWheel=(((-Math.PI/2 - rAngle)%(2*Math.PI))+(2*Math.PI))%(2*Math.PI);
+  var idx=Math.floor(pointerInWheel/arc)%n;
   var winner=rSelected[idx];
   setTimeout(function(){rShowResult(winner);},400);
 }
