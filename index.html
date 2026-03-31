@@ -581,12 +581,12 @@ function rDrawWheel(){
     // 텍스트
     ctx.save();ctx.translate(300,300);ctx.rotate(a0+arc/2);
     var txt=rSelected[i];
-    var fs=Math.min(16,Math.max(10,15-Math.floor(txt.length/4)));
-    ctx.font='600 '+fs+'px Segoe UI,sans-serif';
+    var fs=Math.min(20,Math.max(13,20-Math.floor(txt.length/3)));
+    ctx.font='700 '+fs+'px Segoe UI,sans-serif';
     ctx.fillStyle='#fff';ctx.textAlign='right';ctx.textBaseline='middle';
-    ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=4;
-    var disp=txt.length>9?txt.slice(0,8)+'…':txt;
-    ctx.fillText(disp,262,0);
+    ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=5;
+    var disp=txt.length>10?txt.slice(0,9)+'…':txt;
+    ctx.fillText(disp,268,0);
     ctx.restore();
   }
   // 외곽 링
@@ -624,11 +624,10 @@ function rFinish(){
   document.getElementById('r-spin-btn').textContent='🎡 돌리기!';
   document.getElementById('r-spin-btn').disabled=false;
   var n=rSelected.length,arc=2*Math.PI/n;
-  // 포인터는 위쪽(3π/2) 방향 → 정규화
-  var norm=((-rAngle%(2*Math.PI))+(2*Math.PI))%(2*Math.PI);
-  // 캔버스 시작각도 보정: arc 시작이 3시(0)이므로 포인터 위치(12시=3π/2) 기준
-  var adjusted=(norm+Math.PI/2)%(2*Math.PI);
-  var idx=Math.floor(adjusted/arc)%n;
+  // 포인터는 위쪽(12시) → canvas 기준 -π/2
+  // rAngle만큼 회전했을 때 12시 방향에 해당하는 조각 계산
+  var norm=((-(rAngle - Math.PI/2))%(2*Math.PI)+(2*Math.PI))%(2*Math.PI);
+  var idx=Math.floor(norm/arc)%n;
   var winner=rSelected[idx];
   setTimeout(function(){rShowResult(winner);},400);
 }
