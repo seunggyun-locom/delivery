@@ -20,14 +20,12 @@ label{font-size:13px;font-weight:600;color:#555;margin-bottom:5px;display:block}
 .badge-closed{background:#f8d7da;color:#721c24;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
 .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
 hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
-
 #s-auth{min-height:100vh;padding:20px;display:flex;align-items:center;justify-content:center}
 .auth-box{max-width:380px;width:100%}
 .logo{text-align:center;margin-bottom:28px}
 .google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;border:2px solid #dde1f0;border-radius:12px;background:#fff;font-size:15px;font-weight:600;cursor:pointer;color:#333}
 .google-btn:hover{border-color:#4f6ef7;background:#f8faff}
 .err{color:#dc3545;font-size:13px;margin-top:10px;text-align:center}
-
 #s-rooms{padding:24px;max-width:1100px;margin:0 auto;display:none}
 .rooms-layout{display:grid;grid-template-columns:1fr 320px;gap:20px}
 @media(max-width:800px){.rooms-layout{grid-template-columns:1fr}}
@@ -64,20 +62,39 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 .member-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;margin-bottom:14px}
 .member-chip{display:flex;align-items:center;gap:6px;background:#f0f4ff;border-radius:20px;padding:5px 12px;font-size:13px}
 .member-chip .av{width:22px;height:22px;border-radius:50%;background:#4f6ef7;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+/* 채팅 */
 .chat-wrap{display:flex;flex-direction:column;height:280px}
-.chat-messages{flex:1;overflow-y:auto;padding:12px;background:#f8faff;border-radius:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px}
+.chat-messages{flex:1;overflow-y:auto;padding:12px;background:#f8faff;border-radius:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:4px}
+.chat-msg-wrap{display:flex;flex-direction:column}
+.chat-msg-wrap.me{align-items:flex-end}
+.chat-msg-wrap.other{align-items:flex-start}
 .chat-msg{max-width:75%;padding:8px 13px;border-radius:14px;font-size:14px;line-height:1.4;word-break:break-word}
-.chat-msg.me{align-self:flex-end;background:#4f6ef7;color:#fff;border-bottom-right-radius:4px}
-.chat-msg.other{align-self:flex-start;background:#fff;color:#1a1a2e;border-bottom-left-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.chat-msg.me{background:#4f6ef7;color:#fff;border-bottom-right-radius:4px}
+.chat-msg.other{background:#fff;color:#1a1a2e;border-bottom-left-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .chat-msg .chat-sender{font-size:11px;font-weight:700;margin-bottom:2px;opacity:.7}
+.chat-reactions{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;padding:0 4px}
+.chat-reaction-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;background:rgba(0,0,0,.07);font-size:13px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;user-select:none;position:relative}
+.chat-reaction-chip.mine{border-color:#4f6ef7;background:rgba(79,110,247,.13)}
+.chat-reaction-chip:hover{background:rgba(79,110,247,.1);border-color:#4f6ef7}
+.chat-add-reaction{opacity:0;transition:opacity .2s;background:none;border:1.5px dashed #ccc;border-radius:20px;padding:2px 7px;font-size:13px;cursor:pointer;color:#aaa;flex-shrink:0}
+.chat-add-reaction:hover{border-color:#4f6ef7;color:#4f6ef7;opacity:1!important}
+.chat-msg-wrap:hover .chat-add-reaction{opacity:1}
 .chat-input-row{display:flex;gap:8px}
 .chat-input-row input{flex:1;margin:0}
 .chat-send-btn{padding:0 18px;height:44px;border:none;border-radius:10px;background:#4f6ef7;color:#fff;font-weight:600;cursor:pointer}
+/* 채팅 이모지 피커 */
+.chat-emoji-picker{position:fixed;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.22);padding:12px;z-index:9999;width:252px;display:none}
+.chat-emoji-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;max-height:150px;overflow-y:auto}
+.chat-emoji-btn{width:30px;height:30px;border:none;background:transparent;cursor:pointer;border-radius:6px;font-size:17px;display:flex;align-items:center;justify-content:center}
+.chat-emoji-btn:hover{background:#f0f4ff}
+/* 툴팁 공통 */
+.react-tooltip{display:none;position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:12px;border-radius:8px;padding:6px 10px;white-space:nowrap;pointer-events:none;z-index:9999;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.react-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a1a2e}
+.reaction-chip:hover .react-tooltip,.chat-reaction-chip:hover .react-tooltip{display:block}
 .account-box{background:#fffbe6;border:1.5px solid #ffe58f;border-radius:12px;padding:14px 18px;margin-top:10px}
 .acc-label{font-size:12px;color:#999;margin-bottom:3px}
 .acc-value{font-weight:700;font-size:15px;color:#1a1a2e}
 .copy-acc{padding:5px 12px;border:none;border-radius:8px;background:#4f6ef7;color:#fff;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px}
-
 .ranking-card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
 .rank-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0;overflow:hidden}
 .rank-item:last-child{border-bottom:none}
@@ -90,7 +107,6 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 .rank-tabs{display:flex;background:#f0f4ff;border-radius:10px;padding:3px;margin-bottom:14px}
 .rank-tab{flex:1;padding:7px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:#4f6ef7}
 .rank-tab.active{background:#4f6ef7;color:#fff}
-
 /* 메모판 */
 .memo-board{position:relative;width:100%;background:#fefce8;border-radius:16px;min-height:600px;border:2px dashed #fde68a;overflow:visible;cursor:crosshair;user-select:none}
 .memo-note{position:absolute;width:160px;min-height:100px;border-radius:4px;padding:12px 10px 8px;box-shadow:3px 3px 10px rgba(0,0,0,.15);font-size:13px;line-height:1.5;word-break:break-all}
@@ -99,32 +115,10 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 .memo-del{position:absolute;top:4px;right:6px;background:none;border:none;cursor:pointer;font-size:13px;opacity:0;transition:opacity .2s;padding:0}
 .memo-note:hover .memo-del{opacity:1}
 .memo-reactions{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
-.reaction-chip{display:inline-flex;align-items:center;gap:2px;padding:2px 7px;border-radius:20px;background:rgba(0,0,0,.08);font-size:12px;cursor:pointer;border:1.5px solid transparent}
+.reaction-chip{display:inline-flex;align-items:center;gap:2px;padding:2px 7px;border-radius:20px;background:rgba(0,0,0,.08);font-size:12px;cursor:pointer;border:1.5px solid transparent;position:relative}
 .reaction-chip.mine{border-color:#4f6ef7;background:rgba(79,110,247,.12)}
 .reaction-add{width:22px;height:22px;border-radius:50%;border:1.5px dashed #aaa;background:rgba(255,255,255,.7);cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;color:#888;flex-shrink:0}
 .reaction-add:hover{border-color:#4f6ef7;color:#4f6ef7}
-
-/* 채팅 이모지 반응 */
-.chat-msg-wrap{display:flex;flex-direction:column;margin-bottom:2px}
-.chat-msg-wrap.me{align-items:flex-end}
-.chat-msg-wrap.other{align-items:flex-start}
-.chat-reactions{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;padding:0 4px}
-.chat-reaction-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;background:rgba(0,0,0,.07);font-size:13px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;user-select:none;position:relative}
-.chat-reaction-chip.mine{border-color:#4f6ef7;background:rgba(79,110,247,.13)}
-.chat-reaction-chip:hover{background:rgba(79,110,247,.1);border-color:#4f6ef7}
-.react-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:12px;border-radius:8px;padding:6px 10px;white-space:nowrap;pointer-events:none;z-index:9999;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.25)}
-.react-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a1a2e}
-.chat-reaction-chip:hover .react-tooltip{display:block}
-.reaction-chip{position:relative}
-.reaction-chip:hover .react-tooltip{display:block}
-.chat-add-reaction{opacity:0;transition:opacity .2s;background:none;border:1.5px dashed #ccc;border-radius:20px;padding:2px 7px;font-size:13px;cursor:pointer;color:#aaa}
-.chat-add-reaction:hover{border-color:#4f6ef7;color:#4f6ef7;opacity:1!important}
-.chat-msg-wrap:hover .chat-add-reaction{opacity:1}
-.chat-emoji-picker{position:fixed;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.22);padding:12px;z-index:9999;width:250px;display:none}
-.chat-emoji-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;max-height:150px;overflow-y:auto}
-.chat-emoji-btn{width:30px;height:30px;border:none;background:transparent;cursor:pointer;border-radius:6px;font-size:17px;display:flex;align-items:center;justify-content:center}
-.chat-emoji-btn:hover{background:#f0f4ff}
-
 /* 이모지 피커 */
 .epicker{position:absolute;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.18);padding:12px;z-index:9000;width:260px}
 .epicker-tabs{display:flex;gap:4px;margin-bottom:8px}
@@ -135,19 +129,16 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 .epicker-btn:hover{background:#f0f4ff}
 .epicker-upload{border:2px dashed #dde1f0;border-radius:10px;padding:10px;text-align:center;cursor:pointer;margin-top:8px;font-size:12px;color:#888}
 .epicker-upload:hover{border-color:#4f6ef7;color:#4f6ef7}
-
 /* 정산 */
 .settlement-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0}
 .settlement-item:last-child{border-bottom:none}
 .done-banner{background:linear-gradient(135deg,#28a745,#20c997);color:#fff;border-radius:14px;padding:20px;text-align:center;margin-bottom:16px}
-
 #screen-room{padding:24px;max-width:720px;margin:0 auto;display:none}
 .back-btn{background:none;border:none;color:#4f6ef7;font-size:14px;font-weight:600;cursor:pointer;padding:0;margin-bottom:16px}
 .empty-rooms{text-align:center;padding:36px 20px;color:#aaa}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center;padding:20px}
 .modal-box{background:#fff;border-radius:20px;padding:28px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto}
-
-/* 룰렛 탭 */
+/* 룰렛 */
 #tab-roulette-content{display:none}
 .roulette-wrap{display:grid;grid-template-columns:1fr 300px;gap:16px}
 @media(max-width:700px){.roulette-wrap{grid-template-columns:1fr}}
@@ -170,11 +161,9 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 .r-spin-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(229,57,53,.4)}
 .r-spin-btn:active{transform:scale(.98)}
 .r-spin-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
-.r-hint{font-size:13px;color:#aaa;text-align:center;padding:8px}
-
-/* 룰렛 결과 오버레이 */
+/* 룰렛 결과 */
 #r-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center}
-.r-result-box{background:#fff;border-radius:24px;padding:36px 48px;text-align:center;animation:rpop .5s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+.r-result-box{background:#fff;border-radius:24px;padding:36px 48px;text-align:center;animation:rpop .5s cubic-bezier(.34,1.56,.64,1)}
 @keyframes rpop{from{transform:scale(.3) rotate(-10deg);opacity:0}to{transform:scale(1) rotate(0deg);opacity:1}}
 .r-result-emoji{font-size:56px;margin-bottom:10px;animation:bounce 1s infinite alternate}
 @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
@@ -184,8 +173,6 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 @keyframes glow{from{box-shadow:0 4px 15px rgba(229,57,53,.4)}to{box-shadow:0 4px 30px rgba(229,57,53,.8)}}
 .r-result-close{margin-top:20px;display:block;width:100%;padding:12px;border:2px solid #eee;border-radius:12px;background:#fff;color:#888;font-size:14px;font-weight:600;cursor:pointer}
 .r-result-close:hover{background:#f8faff;border-color:#4f6ef7;color:#4f6ef7}
-
-/* 폭죽 캔버스 */
 #r-confetti{position:fixed;inset:0;pointer-events:none;z-index:8999}
 </style>
 </head>
@@ -194,7 +181,7 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 <canvas id="r-confetti"></canvas>
 
 <!-- 룰렛 결과 오버레이 -->
-<div id="r-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center">
+<div id="r-overlay">
   <div class="r-result-box">
     <div class="r-result-emoji">🎉</div>
     <div class="r-result-sub">오늘의 배달음식은...</div>
@@ -202,6 +189,16 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
     <div class="r-result-badge">✨ 당첨! ✨</div>
     <button class="r-result-close" onclick="rCloseResult()">다시 돌리기 / 닫기</button>
   </div>
+</div>
+
+<!-- 채팅 이모지 피커 -->
+<div class="chat-emoji-picker" id="chat-emoji-picker">
+  <div style="display:flex;gap:4px;margin-bottom:8px">
+    <button id="cep-tab-def" style="flex:1;padding:4px 8px;border:none;border-radius:8px;background:#4f6ef7;color:#fff;font-size:12px;font-weight:600;cursor:pointer">기본</button>
+    <button id="cep-tab-custom" style="flex:1;padding:4px 8px;border:1px solid #dde1f0;border-radius:8px;background:transparent;color:#4f6ef7;font-size:12px;font-weight:600;cursor:pointer">커스텀</button>
+  </div>
+  <div class="chat-emoji-grid" id="chat-emoji-grid-def"></div>
+  <div class="chat-emoji-grid" id="chat-emoji-grid-custom" style="display:none"></div>
 </div>
 
 <!-- 로그인 -->
@@ -237,7 +234,6 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
       <button id="logout-btn" style="padding:9px 14px;border:1.5px solid #dde1f0;border-radius:10px;background:#fff;color:#888;font-size:13px;font-weight:600;cursor:pointer">로그아웃</button>
     </div>
   </div>
-
   <div class="rooms-layout">
     <div>
       <h2 style="font-size:20px;font-weight:800;color:#1a1a2e;margin-bottom:14px">🍜 로컴 배달</h2>
@@ -257,7 +253,7 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
         </div>
       </div>
       <div id="tab-memo-content" style="display:none">
-        <div style="margin-bottom:10px;font-size:13px;color:#888">📌 빈 곳을 클릭해서 메모를 남겨보세요. 메모를 드래그해서 이동할 수 있어요!</div>
+        <div style="margin-bottom:10px;font-size:13px;color:#888">📌 빈 곳을 클릭해서 메모를 남겨보세요. 드래그해서 이동!</div>
         <div class="memo-board" id="memo-board">
           <div id="memo-items"></div>
           <div class="epicker" id="epicker" style="display:none">
@@ -276,8 +272,6 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
           </div>
         </div>
       </div>
-
-      <!-- 룰렛 탭 -->
       <div id="tab-roulette-content" style="display:none">
         <div class="roulette-wrap">
           <div class="r-store-panel">
@@ -297,7 +291,6 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
         </div>
       </div>
     </div>
-
     <div>
       <div class="ranking-card" style="margin-bottom:16px">
         <div style="font-weight:800;font-size:17px;margin-bottom:14px">🏆 이달의 배달 랭킹</div>
@@ -370,10 +363,7 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 <div id="memo-modal" class="modal-bg">
   <div class="modal-box" style="max-width:360px">
     <h3 style="font-size:17px;font-weight:700;margin-bottom:16px">📌 메모 작성</h3>
-    <div style="margin-bottom:12px">
-      <label>내용</label>
-      <textarea id="memo-content" rows="4" placeholder="메모 내용을 입력하세요..." style="resize:none"></textarea>
-    </div>
+    <div style="margin-bottom:12px"><label>내용</label><textarea id="memo-content" rows="4" placeholder="메모 내용을 입력하세요..." style="resize:none"></textarea></div>
     <div style="margin-bottom:16px">
       <label>색깔</label>
       <div style="display:flex;gap:8px;margin-top:6px" id="memo-color-btns">
@@ -402,7 +392,6 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
   <canvas id="lb-canvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
   <button id="lb-next-btn" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);width:48px;height:48px;border:none;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;font-size:26px;cursor:pointer;z-index:10">›</button>
   <div id="lb-counter" style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.7);font-size:14px;z-index:10">1/1</div>
-  <div style="position:absolute;bottom:20px;right:16px;color:rgba(255,255,255,.4);font-size:12px;z-index:10">휠: 줌 | 드래그: 이동 | 더블클릭: 초기화</div>
 </div>
 
 <!-- 방 안 -->
@@ -451,7 +440,7 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
         </div>
         <div id="ai-loading" style="display:none;text-align:center;padding:16px;color:#7c3aed"><div style="font-size:24px;margin-bottom:6px">🤖</div>분석 중...</div>
         <div id="ai-result" style="display:none">
-          <textarea id="ai-menu-text" rows="6" style="resize:vertical;font-size:14px;line-height:1.7" placeholder="AI가 인식한 메뉴가 여기 표시됩니다"></textarea>
+          <textarea id="ai-menu-text" rows="6" style="resize:vertical;font-size:14px;line-height:1.7" placeholder="AI가 인식한 메뉴"></textarea>
           <button id="save-ai-btn" style="margin-top:8px;padding:9px;border:none;border-radius:9px;background:#28a745;color:#fff;font-weight:600;font-size:13px;cursor:pointer;width:100%">✅ 메뉴 목록 저장</button>
         </div>
         <div style="margin-top:10px"><div style="font-size:13px;color:#888;margin-bottom:6px">또는 직접 입력</div>
@@ -533,15 +522,6 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
         <button class="chat-send-btn" id="chat-send-btn">전송</button>
       </div>
     </div>
-    <!-- 채팅 이모지 피커 -->
-    <div class="chat-emoji-picker" id="chat-emoji-picker">
-      <div style="display:flex;gap:4px;margin-bottom:8px">
-        <button id="cep-tab-def" style="flex:1;padding:4px 8px;border:none;border-radius:8px;background:#4f6ef7;color:#fff;font-size:12px;font-weight:600;cursor:pointer">기본</button>
-        <button id="cep-tab-custom" style="flex:1;padding:4px 8px;border:none;border-radius:8px;background:transparent;color:#4f6ef7;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #dde1f0">커스텀</button>
-      </div>
-      <div class="chat-emoji-grid" id="chat-emoji-grid"></div>
-      <div id="cep-custom-grid" style="display:none;grid-template-columns:repeat(7,1fr);gap:3px;max-height:150px;overflow-y:auto"></div>
-    </div>
   </div>
 </div>
 
@@ -551,14 +531,14 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 <script>
 var auth,db;
 var cu=null,myName='',myCode='',myRole='',roomType='',selType_='public';
-var imgIdx=0,images=[],lastChatLen=0,currentTab='public',currentRankTab='amount';
+var imgIdx=0,images=[],lastChatLen='',currentTab='public',currentRankTab='amount';
 var roomLis=null,chatLis=null,pollTmr=null,rankTmr=null,memoLis=null;
 var GEMINI_KEY='AIzaSyAT6AZ_sgVxWGz71IYDqL278C7usJq3oDQ';
 var COLOR_MAP={red:{bg:'#fdecea',border:'#e53935',dot:'#e53935',label:'맛없음'},yellow:{bg:'#fffde7',border:'#f9a825',dot:'#f9a825',label:'평범'},green:{bg:'#e8f5e9',border:'#43a047',dot:'#43a047',label:'맛있음'},blue:{bg:'#e3f2fd',border:'#1e88e5',dot:'#1e88e5',label:'~계의 까사논나'}};
 var DEFAULT_EMOJIS=['👍','😂','❤️','🔥','😮','😢','👏','🎉','😍','🤔','😡','🥹','💀','🫡','🤣','😎','🥰','🫶','✅','💯'];
+var CHAT_EMOJIS=['👍','😂','❤️','🔥','😮','😢','👏','🎉','😍','🤔','😡','🥹','💀','🫡','🤣','😎','🥰','🫶','✅','💯','🍜','🙏','😭','🤩'];
 var curEmojiKey=null,memoClickX=0,memoClickY=0,memoColor='#fef9c3';
 var curChatMsgKey=null;
-var CHAT_EMOJIS=['👍','😂','❤️','🔥','😮','😢','👏','🎉','😍','🤔','😡','🥹','💀','🫡','🤣','😎','🥰','🫶','✅','💯','🍜','🙏','😭','🤩'];
 
 // ══════════ 룰렛 ══════════
 var ROULETTE_STORES=['GTS버거','고돼지','고봉민김밥','교동홀도시락','국수나무','꾸이한끼','담솔','대한냉면','던킨도너츠','롯데리아','마녀김밥','마시어때','마왕족발','맘스터치','맥도날드','문막집','바스버거','백나예김밥','백소정','버거킹','버텍스','본도시락','본죽','봉구스밥버거','상아김밥','샐러디','샐러드박스','서브웨이','슬로우캘리','스쿨푸드','싸움의고수','쌍팔반점','숯불고기냉면','수타우동젠','암샘김밥','영심이떡볶이김밥','오니기리와이규동','오레노카츠','오토김밥','올라포케','올레샐러드','올리아테이블','우리할매떡볶이','이삭토스트','인생냉면','잭슨피자','진된장','진부엉이꼬마김밥','죽도령','처갓집양념치킨','청년홍국수','칠리로29','KFC','킹콩부대찌개','퀴즈노스','탄탄면공방','판미각','파스타예요','플램잭트리','하루엔소쿠','하루일과달밥','한울김밥','해피치즈스마일','헤이올리브','현대육','호미스피자','호호솥밥','홍콩반점','후토루'];
@@ -569,21 +549,14 @@ function rInitStoreList(){
   document.getElementById('r-search').oninput=rFilterStores;
   rRenderStoreList(ROULETTE_STORES);
 }
-function rFilterStores(){
-  var q=document.getElementById('r-search').value.trim().toLowerCase();
-  rRenderStoreList(q?ROULETTE_STORES.filter(function(s){return s.toLowerCase().includes(q);}):ROULETTE_STORES);
-}
+function rFilterStores(){var q=document.getElementById('r-search').value.trim().toLowerCase();rRenderStoreList(q?ROULETTE_STORES.filter(function(s){return s.toLowerCase().includes(q);}):ROULETTE_STORES);}
 function rRenderStoreList(list){
   document.getElementById('r-store-list').innerHTML=list.map(function(s){
     var added=rSelected.includes(s);
     return '<button class="r-store-btn'+(added?' r-added':'')+'" onclick="rToggleStore(\''+s+'\')">'+s+(added?' ✓':'')+'</button>';
   }).join('');
 }
-function rToggleStore(s){
-  if(rSelected.includes(s))rSelected=rSelected.filter(function(x){return x!==s;});
-  else rSelected.push(s);
-  rUpdate();rFilterStores();
-}
+function rToggleStore(s){if(rSelected.includes(s))rSelected=rSelected.filter(function(x){return x!==s;});else rSelected.push(s);rUpdate();rFilterStores();}
 function rUpdate(){
   var n=rSelected.length;
   document.getElementById('r-cnt').textContent=n;
@@ -596,21 +569,13 @@ function rUpdate(){
 function rDrawWheel(){
   var cv=document.getElementById('r-wheel'),ctx=cv.getContext('2d'),n=rSelected.length;
   ctx.clearRect(0,0,600,600);
-  if(!n){
-    ctx.beginPath();ctx.arc(300,300,280,0,2*Math.PI);
-    ctx.fillStyle='#f0f4ff';ctx.fill();
-    ctx.fillStyle='#aaa';ctx.font='bold 18px Segoe UI,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('가게를 2개 이상 추가하세요',300,300);
-    return;
-  }
+  if(!n){ctx.beginPath();ctx.arc(300,300,280,0,2*Math.PI);ctx.fillStyle='#f0f4ff';ctx.fill();ctx.fillStyle='#aaa';ctx.font='bold 18px Segoe UI,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('가게를 2개 이상 추가하세요',300,300);return;}
   var arc=2*Math.PI/n;
   for(var i=0;i<n;i++){
     var a0=rAngle+arc*i,a1=a0+arc;
-    // 조각
     ctx.beginPath();ctx.moveTo(300,300);ctx.arc(300,300,280,a0,a1);ctx.closePath();
     ctx.fillStyle=RCOLORS[i%RCOLORS.length];ctx.fill();
     ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;ctx.stroke();
-    // 텍스트
     ctx.save();ctx.translate(300,300);ctx.rotate(a0+arc/2);
     var txt=rSelected[i];
     var fs=Math.min(26,Math.max(16,26-Math.floor(txt.length/2)));
@@ -621,113 +586,40 @@ function rDrawWheel(){
     ctx.fillText(disp,268,0);
     ctx.restore();
   }
-  // 외곽 링
-  ctx.beginPath();ctx.arc(300,300,280,0,2*Math.PI);
-  ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=4;ctx.stroke();
-  // 중심 원
+  ctx.beginPath();ctx.arc(300,300,280,0,2*Math.PI);ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=4;ctx.stroke();
   ctx.beginPath();ctx.arc(300,300,34,0,2*Math.PI);
-  var cg=ctx.createRadialGradient(300,300,0,300,300,34);
-  cg.addColorStop(0,'#fff');cg.addColorStop(1,'#e8edff');
-  ctx.fillStyle=cg;ctx.shadowColor='rgba(0,0,0,.2)';ctx.shadowBlur=10;ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.font='bold 14px Segoe UI,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillStyle='#4f6ef7';ctx.fillText('GO!',300,300);
+  var cg=ctx.createRadialGradient(300,300,0,300,300,34);cg.addColorStop(0,'#fff');cg.addColorStop(1,'#e8edff');
+  ctx.fillStyle=cg;ctx.shadowColor='rgba(0,0,0,.2)';ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
+  ctx.font='bold 14px Segoe UI,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#4f6ef7';ctx.fillText('GO!',300,300);
 }
 function rSpin(){
   if(rSpinning||rSelected.length<2)return;
-  rSpinning=true;
-  document.getElementById('r-spin-btn').disabled=true;
-  document.getElementById('r-spin-btn').textContent='🎡 돌아가는 중...';
-  var extra=2*Math.PI*(6+Math.random()*10);
-  var dur=4500+Math.random()*2000;
-  var startAngle=rAngle,start=performance.now();
+  rSpinning=true;document.getElementById('r-spin-btn').disabled=true;document.getElementById('r-spin-btn').textContent='🎡 돌아가는 중...';
+  var extra=2*Math.PI*(6+Math.random()*10),dur=4500+Math.random()*2000,startAngle=rAngle,start=performance.now();
   function ease(t){return t<1?1-Math.pow(1-t,4):1;}
-  function frame(now){
-    var t=Math.min((now-start)/dur,1);
-    rAngle=startAngle+extra*ease(t);
-    rDrawWheel();
-    if(t<1)rRaf=requestAnimationFrame(frame);
-    else{rAngle=rAngle%(2*Math.PI);rDrawWheel();rFinish();}
-  }
+  function frame(now){var t=Math.min((now-start)/dur,1);rAngle=startAngle+extra*ease(t);rDrawWheel();if(t<1)rRaf=requestAnimationFrame(frame);else{rAngle=rAngle%(2*Math.PI);rDrawWheel();rFinish();}}
   rRaf=requestAnimationFrame(frame);
 }
 function rFinish(){
-  rSpinning=false;
-  document.getElementById('r-spin-btn').textContent='🎡 돌리기!';
-  document.getElementById('r-spin-btn').disabled=false;
+  rSpinning=false;document.getElementById('r-spin-btn').textContent='🎡 돌리기!';document.getElementById('r-spin-btn').disabled=false;
   var n=rSelected.length,arc=2*Math.PI/n;
-  // 포인터는 12시(-π/2). 휠이 rAngle만큼 회전한 상태에서
-  // 포인터 방향에 해당하는 절대각도 = -π/2 - rAngle (휠 좌표계로 변환)
-  var pointerInWheel=(((-Math.PI/2 - rAngle)%(2*Math.PI))+(2*Math.PI))%(2*Math.PI);
+  var pointerInWheel=(((-Math.PI/2-rAngle)%(2*Math.PI))+(2*Math.PI))%(2*Math.PI);
   var idx=Math.floor(pointerInWheel/arc)%n;
-  var winner=rSelected[idx];
-  setTimeout(function(){rShowResult(winner);},400);
+  setTimeout(function(){rShowResult(rSelected[idx]);},400);
 }
-function rShowResult(name){
-  document.getElementById('r-res-name').textContent=name;
-  document.getElementById('r-overlay').style.display='flex';
-  rLaunchConfetti();
-}
-function rCloseResult(){
-  document.getElementById('r-overlay').style.display='none';
-  rStopConfetti();
-}
-
-// 폭죽
+function rShowResult(name){document.getElementById('r-res-name').textContent=name;document.getElementById('r-overlay').style.display='flex';rLaunchConfetti();}
+function rCloseResult(){document.getElementById('r-overlay').style.display='none';rStopConfetti();}
 var rConfColors=['#534AB7','#1D9E75','#D85A30','#e24b4a','#185FA5','#D4537E','#EF9F27','#fff','#4f6ef7','#ff7043','#FFD700'];
-function rMakeParticle(){
-  return{
-    x:Math.random()*window.innerWidth,y:-20-Math.random()*300,
-    vx:(Math.random()-0.5)*10,vy:2+Math.random()*8,
-    rot:Math.random()*360,rotV:(Math.random()-0.5)*12,
-    w:6+Math.random()*12,h:4+Math.random()*6,
-    c:rConfColors[Math.floor(Math.random()*rConfColors.length)],
-    alpha:1,shape:Math.random()>0.5?'rect':'circle'
-  };
-}
-function rLaunchConfetti(){
-  var cv=document.getElementById('r-confetti');
-  cv.width=window.innerWidth;cv.height=window.innerHeight;
-  rConfActive=true;rConfettiArr=[];
-  for(var i=0;i<220;i++)rConfettiArr.push(rMakeParticle());
-  if(rConfRaf)cancelAnimationFrame(rConfRaf);
-  rAnimConf();
-  setTimeout(rStopConfetti,5000);
-}
-function rAnimConf(){
-  if(!rConfActive)return;
-  var cv=document.getElementById('r-confetti'),ctx=cv.getContext('2d');
-  ctx.clearRect(0,0,cv.width,cv.height);
-  rConfettiArr.forEach(function(p){
-    p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.rot+=p.rotV;
-    if(p.y>cv.height-50)p.alpha=Math.max(0,p.alpha-0.03);
-    ctx.save();ctx.globalAlpha=p.alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);
-    ctx.fillStyle=p.c;
-    if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.w/2,0,2*Math.PI);ctx.fill();}
-    else ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
-    ctx.restore();
-  });
-  rConfettiArr=rConfettiArr.filter(function(p){return p.alpha>0;});
-  if(rConfettiArr.length)rConfRaf=requestAnimationFrame(rAnimConf);
-}
-function rStopConfetti(){
-  rConfActive=false;
-  if(rConfRaf)cancelAnimationFrame(rConfRaf);
-  var cv=document.getElementById('r-confetti');
-  cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
-}
+function rMakeParticle(){return{x:Math.random()*window.innerWidth,y:-20-Math.random()*300,vx:(Math.random()-.5)*10,vy:2+Math.random()*8,rot:Math.random()*360,rotV:(Math.random()-.5)*12,w:6+Math.random()*12,h:4+Math.random()*6,c:rConfColors[Math.floor(Math.random()*rConfColors.length)],alpha:1,shape:Math.random()>.5?'rect':'circle'};}
+function rLaunchConfetti(){var cv=document.getElementById('r-confetti');cv.width=window.innerWidth;cv.height=window.innerHeight;rConfActive=true;rConfettiArr=[];for(var i=0;i<220;i++)rConfettiArr.push(rMakeParticle());if(rConfRaf)cancelAnimationFrame(rConfRaf);rAnimConf();setTimeout(rStopConfetti,5000);}
+function rAnimConf(){if(!rConfActive)return;var cv=document.getElementById('r-confetti'),ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);rConfettiArr.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.rot+=p.rotV;if(p.y>cv.height-50)p.alpha=Math.max(0,p.alpha-.03);ctx.save();ctx.globalAlpha=p.alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.c;if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.w/2,0,2*Math.PI);ctx.fill();}else ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});rConfettiArr=rConfettiArr.filter(function(p){return p.alpha>0;});if(rConfettiArr.length)rConfRaf=requestAnimationFrame(rAnimConf);}
+function rStopConfetti(){rConfActive=false;if(rConfRaf)cancelAnimationFrame(rConfRaf);var cv=document.getElementById('r-confetti');cv.getContext('2d').clearRect(0,0,cv.width,cv.height);}
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function genCode(){return Array.from({length:4},function(){return 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)];}).join('');}
 function getYM(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');}
 function getRoomColor(c){return COLOR_MAP[c]||COLOR_MAP.yellow;}
-
-function setScreen(id){
-  ['s-auth','s-rooms','screen-room'].forEach(function(s){var e=document.getElementById(s);if(e){e.style.display='none';e.classList.remove('active');}});
-  var t=document.getElementById(id);
-  if(t){t.style.display=(id==='s-auth')?'flex':'block';t.classList.add('active');}
-  window.scrollTo({top:0,behavior:'smooth'});
-}
+function setScreen(id){['s-auth','s-rooms','screen-room'].forEach(function(s){var e=document.getElementById(s);if(e){e.style.display='none';e.classList.remove('active');}});var t=document.getElementById(id);if(t){t.style.display=(id==='s-auth')?'flex':'block';t.classList.add('active');}window.scrollTo({top:0,behavior:'smooth'});}
 function saveSession(){localStorage.setItem('lc_r',JSON.stringify({myCode:myCode,myRole:myRole,roomType:roomType}));}
 function clearSession(){localStorage.removeItem('lc_r');}
 function loadSession(){try{var d=JSON.parse(localStorage.getItem('lc_r')||'{}');myCode=d.myCode||'';myRole=d.myRole||'';roomType=d.roomType||'';}catch(e){myCode='';myRole='';roomType='';}}
@@ -774,39 +666,30 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('join-private-btn').onclick=joinPrivate;
   document.getElementById('priv-code').oninput=function(){this.value=this.value.toUpperCase();};
   document.getElementById('priv-code').onkeydown=function(e){if(e.key==='Enter')joinPrivate();};
-
   document.querySelectorAll('.tab-btn').forEach(function(btn){btn.onclick=function(){switchTab(this.dataset.tab);};});
+
+  // 채팅 이모지 피커 외부 클릭 닫기
+  document.addEventListener('click',function(e){
+    var picker=document.getElementById('chat-emoji-picker');
+    if(picker&&picker.style.display!=='none'&&!picker.contains(e.target)&&!e.target.classList.contains('chat-add-reaction'))picker.style.display='none';
+  });
 
   initMemo();
   rInitStoreList();
   rDrawWheel();
-
   document.getElementById('rank-tab-amount').classList.add('active');
 
   auth.onAuthStateChanged(async function(user){
-    if(user){
-      cu=user;myName=user.displayName||user.email.split('@')[0];
-      updateNav();loadSession();
+    if(user){cu=user;myName=user.displayName||user.email.split('@')[0];updateNav();loadSession();
       if(myCode&&myRole){var s=await db.ref('rooms/'+myCode).get();if(s.exists()){stopAll();startRoom(myCode,myRole,s.val().type||'public');return;}clearSession();}
       showRooms();
     }else{cu=null;myName='';stopAll();setScreen('s-auth');}
   });
 });
 
-function updateNav(){
-  document.getElementById('nav-avatar').textContent=myName.charAt(0).toUpperCase();
-  document.getElementById('nav-name').textContent=myName;
-  document.getElementById('nav-email').textContent=cu&&cu.email||'';
-}
+function updateNav(){document.getElementById('nav-avatar').textContent=myName.charAt(0).toUpperCase();document.getElementById('nav-name').textContent=myName;document.getElementById('nav-email').textContent=cu&&cu.email||'';}
 
-function showRooms(){
-  updateNav();setScreen('s-rooms');stopAll();
-  loadPublicRooms();loadRanking();loadStoreRanking();
-  pollTmr=setInterval(loadPublicRooms,4000);
-  rankTmr=setInterval(function(){loadRanking();loadStoreRanking();},10000);
-  var now=new Date();
-  document.getElementById('rank-month').textContent=now.getFullYear()+'년 '+(now.getMonth()+1)+'월';
-}
+function showRooms(){updateNav();setScreen('s-rooms');stopAll();loadPublicRooms();loadRanking();loadStoreRanking();pollTmr=setInterval(loadPublicRooms,4000);rankTmr=setInterval(function(){loadRanking();loadStoreRanking();},10000);var now=new Date();document.getElementById('rank-month').textContent=now.getFullYear()+'년 '+(now.getMonth()+1)+'월';}
 
 function switchTab(tab){
   currentTab=tab;
@@ -817,7 +700,7 @@ function switchTab(tab){
     if(btn){btn.style.background=t===tab?'#4f6ef7':'transparent';btn.style.color=t===tab?'#fff':'#4f6ef7';}
   });
   if(tab==='memo')loadMemos();
-  if(tab==='roulette'){rDrawWheel();}
+  if(tab==='roulette')rDrawWheel();
 }
 
 async function loadPublicRooms(){
@@ -828,9 +711,7 @@ async function loadPublicRooms(){
     var pub=Object.entries(snap.val()).filter(function(e){return e[1].type==='public';});
     if(!pub.length){list.innerHTML='<div class="empty-rooms"><div>🍜</div>공개된 방이 없습니다</div>';return;}
     list.innerHTML=pub.map(function(e){
-      var code=e[0],r=e[1];
-      var cnt=r.orders?Object.values(r.orders).filter(function(o){return !o.canceled;}).length:0;
-      var c=getRoomColor(r.color);
+      var code=e[0],r=e[1];var cnt=r.orders?Object.values(r.orders).filter(function(o){return !o.canceled;}).length:0;var c=getRoomColor(r.color);
       return '<div class="room-card" data-code="'+code+'" style="border-left:4px solid '+c.border+';background:'+c.bg+'">'
         +'<div style="font-size:26px">'+(r.done?'✅':'🍜')+'</div>'
         +'<div class="room-info"><div class="room-title">'+esc(r.title)+'</div><div class="room-host">주최자: '+esc(r.host)+'</div>'
@@ -845,73 +726,36 @@ async function loadPublicRooms(){
 }
 
 async function loadRanking(){
-  var snap=await db.ref('ranking/'+getYM()).get();
-  var list=document.getElementById('rank-list');
+  var snap=await db.ref('ranking/'+getYM()).get();var list=document.getElementById('rank-list');
   if(!snap.exists()){list.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:14px">아직 없어요</div>';return;}
-  var entries=Object.entries(snap.val());
-  entries.sort(function(a,b){return currentRankTab==='amount'?(b[1].totalAmount||0)-(a[1].totalAmount||0):(b[1].orderCount||0)-(a[1].orderCount||0);});
-  list.innerHTML=entries.slice(0,10).map(function(e,i){
-    var d=e[1],nc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
-    var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-    var val=currentRankTab==='amount'?(d.totalAmount||0).toLocaleString()+'원':(d.orderCount||0)+'번';
-    return '<div class="rank-item"><div class="rank-num '+nc+'">'+(medal||(i+1))+'</div><div style="flex:1;font-weight:600;font-size:14px;color:#1a1a2e">'+esc(d.name||'?')+'</div><div class="rank-badge">'+val+'</div></div>';
-  }).join('');
+  var entries=Object.entries(snap.val());entries.sort(function(a,b){return currentRankTab==='amount'?(b[1].totalAmount||0)-(a[1].totalAmount||0):(b[1].orderCount||0)-(a[1].orderCount||0);});
+  list.innerHTML=entries.slice(0,10).map(function(e,i){var d=e[1],nc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';var val=currentRankTab==='amount'?(d.totalAmount||0).toLocaleString()+'원':(d.orderCount||0)+'번';return '<div class="rank-item"><div class="rank-num '+nc+'">'+(medal||(i+1))+'</div><div style="flex:1;font-weight:600;font-size:14px;color:#1a1a2e">'+esc(d.name||'?')+'</div><div class="rank-badge">'+val+'</div></div>';}).join('');
 }
 
 async function loadStoreRanking(){
-  var snap=await db.ref('storeRanking/'+getYM()).get();
-  var el=document.getElementById('store-rank-list');
+  var snap=await db.ref('storeRanking/'+getYM()).get();var el=document.getElementById('store-rank-list');
   if(!snap.exists()){el.innerHTML='<div style="color:#aaa;text-align:center;padding:16px;font-size:14px">아직 완료된 배달이 없어요</div>';return;}
-  var entries=Object.entries(snap.val()).sort(function(a,b){return (b[1].count||0)-(a[1].count||0);});
-  var max=entries[0][1].count||1;
-  el.innerHTML=entries.map(function(e,i){
-    var s=e[1],nc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
-    var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-    var bw=Math.round((s.count||0)/max*100);
-    return '<div class="rank-item" style="flex-direction:column;align-items:flex-start;gap:4px">'
-      +'<div style="display:flex;align-items:center;gap:8px;width:100%"><div class="rank-num '+nc+'">'+(medal||(i+1))+'</div><div style="flex:1;font-weight:600;font-size:13px">'+esc(s.name||e[0])+'</div><div class="rank-badge">'+(s.count||0)+'회</div></div>'
-      +'<div style="width:100%;height:4px;background:#f0f0f0;border-radius:4px;margin-left:36px"><div style="width:'+bw+'%;height:100%;background:#4f6ef7;border-radius:4px"></div></div>'
-      +'</div>';
-  }).join('');
+  var entries=Object.entries(snap.val()).sort(function(a,b){return (b[1].count||0)-(a[1].count||0);});var max=entries[0][1].count||1;
+  el.innerHTML=entries.map(function(e,i){var s=e[1],nc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';var bw=Math.round((s.count||0)/max*100);return '<div class="rank-item" style="flex-direction:column;align-items:flex-start;gap:4px"><div style="display:flex;align-items:center;gap:8px;width:100%"><div class="rank-num '+nc+'">'+(medal||(i+1))+'</div><div style="flex:1;font-weight:600;font-size:13px">'+esc(s.name||e[0])+'</div><div class="rank-badge">'+(s.count||0)+'회</div></div><div style="width:100%;height:4px;background:#f0f0f0;border-radius:4px;margin-left:36px"><div style="width:'+bw+'%;height:100%;background:#4f6ef7;border-radius:4px"></div></div></div>';}).join('');
 }
 
-function showCreateModal(){
-  document.getElementById('create-modal').style.display='flex';
-  document.getElementById('c-title-select').value='';
-  document.getElementById('c-title').value='';
-  document.getElementById('c-title').style.display='none';
-  document.getElementById('c-bank').value='';
-  selRoomType('public');
-}
+function showCreateModal(){document.getElementById('create-modal').style.display='flex';document.getElementById('c-title-select').value='';document.getElementById('c-title').value='';document.getElementById('c-title').style.display='none';document.getElementById('c-bank').value='';selRoomType('public');}
 function selRoomType(t){selType_=t;document.getElementById('type-public').classList.toggle('sel',t==='public');document.getElementById('type-private').classList.toggle('sel',t==='private');}
 
 async function createRoom(){
-  var sel=document.getElementById('c-title-select').value;
-  var title=(sel==='__direct__'||!sel)?document.getElementById('c-title').value.trim():sel;
-  var bank=document.getElementById('c-bank').value.trim();
-  var colorEl=document.querySelector('input[name="room-color"]:checked');
-  var color=colorEl?colorEl.value:'yellow';
+  var sel=document.getElementById('c-title-select').value;var title=(sel==='__direct__'||!sel)?document.getElementById('c-title').value.trim():sel;var bank=document.getElementById('c-bank').value.trim();var colorEl=document.querySelector('input[name="room-color"]:checked');var color=colorEl?colorEl.value:'yellow';
   if(!title)return alert('가게명을 입력해주세요.');
-  var code=genCode();
-  document.getElementById('create-modal').style.display='none';
+  var code=genCode();document.getElementById('create-modal').style.display='none';
   await db.ref('rooms/'+code).set({title:title,host:myName,ownerUid:cu.uid,open:false,done:false,images:[],orders:{},chat:{},type:selType_,bank:bank||'',color:color,createdAt:Date.now()});
   enterRoom(code);
 }
 
-async function enterRoom(code){
-  var snap=await db.ref('rooms/'+code).get();
-  if(!snap.exists())return alert('방을 찾을 수 없습니다.');
-  startRoom(code,snap.val().ownerUid===cu.uid?'host':'participant',snap.val().type||'public');
-}
-async function joinPrivate(){
-  var code=document.getElementById('priv-code').value.trim().toUpperCase();
-  if(!code)return alert('방 코드를 입력해주세요.');
-  enterRoom(code);
-}
+async function enterRoom(code){var snap=await db.ref('rooms/'+code).get();if(!snap.exists())return alert('방을 찾을 수 없습니다.');startRoom(code,snap.val().ownerUid===cu.uid?'host':'participant',snap.val().type||'public');}
+async function joinPrivate(){var code=document.getElementById('priv-code').value.trim().toUpperCase();if(!code)return alert('방 코드를 입력해주세요.');enterRoom(code);}
 function goBack(){myCode='';myRole='';roomType='';clearSession();stopAll();showRooms();}
 
 function startRoom(code,role,type){
-  stopAll();myCode=code;myRole=role;roomType=type;lastChatLen=-1;
+  stopAll();myCode=code;myRole=role;roomType=type;lastChatLen='';
   saveSession();setScreen('screen-room');
   document.getElementById('chat-messages').innerHTML='';
   document.getElementById('r-role-badge').textContent=role==='host'?'👑 주최자':'🙋 참여자';
@@ -927,94 +771,59 @@ function startRoom(code,role,type){
 function renderRoom(room){
   document.getElementById('r-title').textContent=room.title;
   document.getElementById('r-sub').textContent='주최자: '+room.host+' | '+(roomType==='private'?'🔒 비밀 방':'🌐 자유 참여');
-  var badge=document.getElementById('r-status-badge');
-  var doneBtn=document.getElementById('done-btn');
-
+  var badge=document.getElementById('r-status-badge'),doneBtn=document.getElementById('done-btn');
   if(room.done){
-    document.getElementById('done-banner').style.display='block';
-    badge.textContent='🎉 완료';badge.className='badge-open';
+    document.getElementById('done-banner').style.display='block';badge.textContent='🎉 완료';badge.className='badge-open';
     document.getElementById('settlement-section').style.display='block';
     var ords=room.orders?Object.values(room.orders).filter(function(o){return !o.canceled;}):[];
     renderSettlement(ords,room.bank);
-    document.getElementById('r-order-section').style.display='none';
-    document.getElementById('r-closed-msg').style.display='none';
+    document.getElementById('r-order-section').style.display='none';document.getElementById('r-closed-msg').style.display='none';
     if(doneBtn){doneBtn.style.display='none';document.getElementById('open-btn').style.display='none';document.getElementById('close-btn').style.display='none';}
-  } else {
-    document.getElementById('done-banner').style.display='none';
-    document.getElementById('settlement-section').style.display='none';
-    badge.textContent=room.open?'✅ 주문 중':'🔒 마감';
-    badge.className=room.open?'badge-open':'badge-closed';
+  }else{
+    document.getElementById('done-banner').style.display='none';document.getElementById('settlement-section').style.display='none';
+    badge.textContent=room.open?'✅ 주문 중':'🔒 마감';badge.className=room.open?'badge-open':'badge-closed';
     if(doneBtn){
-      doneBtn.style.display='block';
-      document.getElementById('open-btn').style.display='';
-      document.getElementById('close-btn').style.display='';
+      doneBtn.style.display='block';document.getElementById('open-btn').style.display='';document.getElementById('close-btn').style.display='';
       var allOrds=room.orders?Object.values(room.orders).filter(function(o){return !o.canceled;}):[];
       var allPaid=allOrds.length>0&&allOrds.every(function(o){return o.paid===true;});
-      doneBtn.disabled=!allPaid;
-      doneBtn.style.opacity=allPaid?'1':'0.4';
-      doneBtn.style.cursor=allPaid?'pointer':'not-allowed';
+      doneBtn.disabled=!allPaid;doneBtn.style.opacity=allPaid?'1':'0.4';doneBtn.style.cursor=allPaid?'pointer':'not-allowed';
       doneBtn.textContent=allPaid?'🎉 배달 완료!':'🔒 전원 입금 후 완료 가능';
     }
   }
-
   if(room.bank){
     if(myRole==='host'){document.getElementById('h-bank-input').value=room.bank;document.getElementById('h-bank-val').textContent=room.bank;document.getElementById('h-bank-preview').style.display='block';}
     else{document.getElementById('p-account-box').style.display='block';document.getElementById('p-bank-val').textContent=room.bank;}
-  } else document.getElementById('p-account-box').style.display='none';
-
+  }else document.getElementById('p-account-box').style.display='none';
   document.getElementById('img-section').style.display='block';
   if(myRole==='host'){renderHostImages(room.images||[]);document.getElementById('ai-menu-section').style.display='block';if(room.menuList)renderSavedMenus(room.menuList);}
   images=room.images||[];
   if(!images.length){document.getElementById('p-no-img').style.display='block';document.getElementById('p-img-viewer').style.display='none';}
   else{document.getElementById('p-no-img').style.display='none';document.getElementById('p-img-viewer').style.display='block';if(imgIdx>=images.length)imgIdx=0;updateImgViewer();}
   renderMenuHint(room.menuList||'');
-
   if(!room.done){
     document.getElementById('r-closed-msg').style.display=room.open?'none':'block';
     document.getElementById('r-order-section').style.display=room.open?'block':'none';
     if(room.open){
-      var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
-      var myO=room.orders&&room.orders[key];
-      if(myO&&!myO.canceled){
-        document.getElementById('my-order-form').style.display='none';
-        document.getElementById('my-order-done').style.display='block';
-        document.getElementById('my-order-display').textContent=myO.order+(myO.price!=null?'\n💰 '+Number(myO.price).toLocaleString()+'원':'')+(myO.memo?'\n💬 '+myO.memo:'');
-      } else {
-        document.getElementById('my-order-form').style.display='block';
-        document.getElementById('my-order-done').style.display='none';
-      }
-      var orders2=room.orders?Object.values(room.orders).filter(function(o){return !o.canceled;}):[];
-      renderOrders(orders2,room);
+      var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');var myO=room.orders&&room.orders[key];
+      if(myO&&!myO.canceled){document.getElementById('my-order-form').style.display='none';document.getElementById('my-order-done').style.display='block';document.getElementById('my-order-display').textContent=myO.order+(myO.price!=null?'\n💰 '+Number(myO.price).toLocaleString()+'원':'')+(myO.memo?'\n💬 '+myO.memo:'');}
+      else{document.getElementById('my-order-form').style.display='block';document.getElementById('my-order-done').style.display='none';}
+      var orders2=room.orders?Object.values(room.orders).filter(function(o){return !o.canceled;}):[];renderOrders(orders2,room);
     }
   }
 }
 
 function renderOrders(orders,room){
-  var ml=document.getElementById('member-list');
-  ml.innerHTML=orders.map(function(o){return '<div class="member-chip"><div class="av">'+esc((o.name||'?').charAt(0).toUpperCase())+'</div><span>'+esc(o.name)+'</span></div>';}).join('');
+  var ml=document.getElementById('member-list');ml.innerHTML=orders.map(function(o){return '<div class="member-chip"><div class="av">'+esc((o.name||'?').charAt(0).toUpperCase())+'</div><span>'+esc(o.name)+'</span></div>';}).join('');
   document.getElementById('order-cnt').textContent=orders.length+'명';
-  var w=document.getElementById('orders-wrap');
-  if(!orders.length){w.innerHTML='<div style="color:#aaa;text-align:center;padding:16px">아직 주문이 없습니다</div>';return;}
+  var w=document.getElementById('orders-wrap');if(!orders.length){w.innerHTML='<div style="color:#aaa;text-align:center;padding:16px">아직 주문이 없습니다</div>';return;}
   var okeys={};if(room.orders)Object.entries(room.orders).forEach(function(e){if(!e[1].canceled)okeys[e[1].name]=e[0];});
   w.innerHTML=orders.map(function(o){
     var isMe=o.name===myName,ok=okeys[o.name]||'',isPaid=o.paid===true,canPay=isMe||myRole==='host';
-    var priceHtml=o.price!=null
-      ?'<div style="font-size:13px;color:#4f6ef7;font-weight:700;margin-top:4px">💰 '+Number(o.price).toLocaleString()+'원</div>'
-      :myRole==='host'
-        ?'<div style="display:flex;align-items:center;gap:8px;margin-top:6px"><input type="number" id="pi-'+ok+'" placeholder="가격 입력" min="0" style="width:110px;padding:6px 10px;font-size:13px;border:1.5px solid #dde1f0;border-radius:8px"><button onclick="savePriceByKey(\''+ok+'\')" style="padding:6px 12px;border:none;border-radius:8px;background:#4f6ef7;color:#fff;font-size:12px;font-weight:600;cursor:pointer">저장</button></div>'
-        :'<div style="font-size:12px;color:#aaa;margin-top:4px">가격 미입력</div>';
-    var paidHtml=canPay
-      ?'<button onclick="togglePaid(\''+ok+'\','+isPaid+')" style="margin-top:6px;padding:5px 12px;border:none;border-radius:8px;background:'+(isPaid?'#28a745':'#e0e0e0')+';color:'+(isPaid?'#fff':'#555')+';font-size:12px;font-weight:700;cursor:pointer">'+(isPaid?'✅ 입금완료':'💸 입금확인')+'</button>'
-      :(isPaid?'<div style="margin-top:5px;font-size:12px;color:#28a745;font-weight:700">✅ 입금완료</div>':'<div style="margin-top:5px;font-size:12px;color:#aaa">💸 입금 대기중</div>');
-    return '<div class="order-item" style="'+(isMe?'border-color:#4f6ef7;':'')+(isPaid?'background:#f0fff4;border-color:#28a745;':'')+'">'
-      +'<div class="order-name">'+(isMe?'⭐':'🙋')+' '+esc(o.name)+(isMe?' <span style="font-size:11px;color:#4f6ef7">(나)</span>':'')+'</div>'
-      +'<div class="order-menu">'+esc(o.order)+'</div>'+priceHtml+paidHtml
-      +(o.memo?'<div class="order-memo">💬 '+esc(o.memo)+'</div>':'')
-      +'</div>';
+    var priceHtml=o.price!=null?'<div style="font-size:13px;color:#4f6ef7;font-weight:700;margin-top:4px">💰 '+Number(o.price).toLocaleString()+'원</div>':myRole==='host'?'<div style="display:flex;align-items:center;gap:8px;margin-top:6px"><input type="number" id="pi-'+ok+'" placeholder="가격 입력" min="0" style="width:110px;padding:6px 10px;font-size:13px;border:1.5px solid #dde1f0;border-radius:8px"><button onclick="savePriceByKey(\''+ok+'\')" style="padding:6px 12px;border:none;border-radius:8px;background:#4f6ef7;color:#fff;font-size:12px;font-weight:600;cursor:pointer">저장</button></div>':'<div style="font-size:12px;color:#aaa;margin-top:4px">가격 미입력</div>';
+    var paidHtml=canPay?'<button onclick="togglePaid(\''+ok+'\','+isPaid+')" style="margin-top:6px;padding:5px 12px;border:none;border-radius:8px;background:'+(isPaid?'#28a745':'#e0e0e0')+';color:'+(isPaid?'#fff':'#555')+';font-size:12px;font-weight:700;cursor:pointer">'+(isPaid?'✅ 입금완료':'💸 입금확인')+'</button>':(isPaid?'<div style="margin-top:5px;font-size:12px;color:#28a745;font-weight:700">✅ 입금완료</div>':'<div style="margin-top:5px;font-size:12px;color:#aaa">💸 입금 대기중</div>');
+    return '<div class="order-item" style="'+(isMe?'border-color:#4f6ef7;':'')+(isPaid?'background:#f0fff4;border-color:#28a745;':'')+'">'+'<div class="order-name">'+(isMe?'⭐':'🙋')+' '+esc(o.name)+(isMe?' <span style="font-size:11px;color:#4f6ef7">(나)</span>':'')+'</div>'+'<div class="order-menu">'+esc(o.order)+'</div>'+priceHtml+paidHtml+(o.memo?'<div class="order-memo">💬 '+esc(o.memo)+'</div>':'')+'</div>';
   }).join('');
-  var priced=orders.filter(function(o){return o.price!=null;});
-  var paidAll=orders.length>0&&orders.every(function(o){return o.paid===true;});
-  var paidCnt=orders.filter(function(o){return o.paid===true;}).length;
+  var priced=orders.filter(function(o){return o.price!=null;});var paidAll=orders.length>0&&orders.every(function(o){return o.paid===true;});var paidCnt=orders.filter(function(o){return o.paid===true;}).length;
   if(priced.length){var total=priced.reduce(function(s,o){return s+Number(o.price);},0);w.innerHTML+='<div style="margin-top:10px;padding:12px 16px;background:#f0f4ff;border-radius:10px;font-weight:700;color:#4f6ef7;font-size:15px">💰 합계: '+total.toLocaleString()+'원 <span style="font-weight:400;font-size:13px;color:#888">('+priced.length+'/'+orders.length+'명)</span></div>';}
   w.innerHTML+='<div style="margin-top:8px;padding:10px 16px;background:'+(paidAll?'#f0fff4':'#fff8e1')+';border-radius:10px;font-size:14px;font-weight:600;color:'+(paidAll?'#28a745':'#f9a825')+'">💳 입금 현황: '+paidCnt+'/'+orders.length+'명 '+(paidAll?'✅ 전원 완료!':'')+'</div>';
 }
@@ -1024,164 +833,118 @@ function savePriceByKey(ok){var inp=document.getElementById('pi-'+ok);if(!inp)re
 
 function renderSettlement(orders,bank){
   var total=orders.reduce(function(s,o){return s+(o.price||0);},0);
-  document.getElementById('settlement-list').innerHTML=orders.map(function(o){
-    return '<div class="settlement-item"><div><div style="font-weight:700;font-size:14px">'+esc(o.name)+'</div><div style="font-size:13px;color:#555;margin-top:2px">'+esc(o.order)+'</div></div><div style="font-weight:700;color:#4f6ef7">'+(o.price!=null?Number(o.price).toLocaleString()+'원':'미입력')+'</div></div>';
-  }).join('');
+  document.getElementById('settlement-list').innerHTML=orders.map(function(o){return '<div class="settlement-item"><div><div style="font-weight:700;font-size:14px">'+esc(o.name)+'</div><div style="font-size:13px;color:#555;margin-top:2px">'+esc(o.order)+'</div></div><div style="font-weight:700;color:#4f6ef7">'+(o.price!=null?Number(o.price).toLocaleString()+'원':'미입력')+'</div></div>';}).join('');
   document.getElementById('settlement-total').innerHTML='💰 총 합계: <strong>'+total.toLocaleString()+'원</strong>'+(bank?' | 입금: '+esc(bank):'');
 }
 
-function onDoneClick(){
-  var btn=document.getElementById('done-btn');
-  if(btn&&btn.disabled)return;
-  if(window.confirm('배달이 완료되었습니까?\n완료하면 랭킹에 등록되고 주문이 마감됩니다.'))completeDelivery();
-}
-
+function onDoneClick(){var btn=document.getElementById('done-btn');if(btn&&btn.disabled)return;if(window.confirm('배달이 완료되었습니까?'))completeDelivery();}
 async function completeDelivery(){
-  var snap=await db.ref('rooms/'+myCode).get();
-  if(!snap.exists())return;
-  var room=snap.val();
-  var orders=room.orders?Object.values(room.orders).filter(function(o){return !o.canceled;}):[]; 
-  if(!orders.length){alert('주문이 없습니다.');return;}
+  var snap=await db.ref('rooms/'+myCode).get();if(!snap.exists())return;var room=snap.val();
+  var orders=room.orders?Object.values(room.orders).filter(function(o){return !o.canceled;}):[]; if(!orders.length){alert('주문이 없습니다.');return;}
   var ym=getYM(),updates={};
-  for(var i=0;i<orders.length;i++){
-    var o=orders[i];
-    var uid=Object.keys(room.orders).find(function(k){return room.orders[k]===o;})||o.name;
-    var rk='ranking/'+ym+'/'+uid.replace(/[^a-zA-Z0-9가-힣]/g,'_');
-    var ex=await db.ref(rk).get();
-    var cur=ex.exists()?ex.val():{name:o.name,totalAmount:0,orderCount:0};
-    updates[rk]={name:o.name,totalAmount:(cur.totalAmount||0)+(o.price||0),orderCount:(cur.orderCount||0)+1};
-  }
-  var sk=room.title.replace(/[^a-zA-Z0-9가-힣]/g,'_');
-  var sr='storeRanking/'+ym+'/'+sk;
-  var ss=await db.ref(sr).get();
-  var sc=ss.exists()?ss.val():{name:room.title,count:0};
-  updates[sr]={name:room.title,count:(sc.count||0)+1};
-  updates['rooms/'+myCode+'/done']=true;
-  updates['rooms/'+myCode+'/open']=false;
-  updates['rooms/'+myCode+'/completedAt']=Date.now();
-  await db.ref().update(updates);
-  alert('🎉 배달 완료! 랭킹에 등록되었습니다.');
+  for(var i=0;i<orders.length;i++){var o=orders[i];var uid=Object.keys(room.orders).find(function(k){return room.orders[k]===o;})||o.name;var rk='ranking/'+ym+'/'+uid.replace(/[^a-zA-Z0-9가-힣]/g,'_');var ex=await db.ref(rk).get();var cur=ex.exists()?ex.val():{name:o.name,totalAmount:0,orderCount:0};updates[rk]={name:o.name,totalAmount:(cur.totalAmount||0)+(o.price||0),orderCount:(cur.orderCount||0)+1};}
+  var sk=room.title.replace(/[^a-zA-Z0-9가-힣]/g,'_');var sr='storeRanking/'+ym+'/'+sk;var ss=await db.ref(sr).get();var sc=ss.exists()?ss.val():{name:room.title,count:0};updates[sr]={name:room.title,count:(sc.count||0)+1};
+  updates['rooms/'+myCode+'/done']=true;updates['rooms/'+myCode+'/open']=false;updates['rooms/'+myCode+'/completedAt']=Date.now();
+  await db.ref().update(updates);alert('🎉 배달 완료! 랭킹에 등록되었습니다.');
 }
 
-function renderMenuHint(text){
-  var hint=document.getElementById('menu-hint'),el=document.getElementById('menu-hint-items');
-  if(!text||!text.trim()){hint.style.display='none';return;}
-  var items=text.split('\n').filter(function(l){return l.trim();});
-  if(!items.length){hint.style.display='none';return;}
-  hint.style.display='block';el.innerHTML='';
-  items.forEach(function(item){
-    var name=item.split('-')[0].trim(),price=item.includes('-')?item.split('-').slice(1).join('-').trim():'';
-    var btn=document.createElement('button');
-    btn.textContent=name+(price?' ('+price+')':'');
-    btn.style.cssText='padding:6px 12px;border:1.5px solid #c4b5fd;border-radius:20px;background:#fff;color:#7c3aed;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:4px';
-    btn.onclick=function(){var ta=document.getElementById('r-order-text');ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+name+' 1개';ta.focus();};
-    el.appendChild(btn);
-  });
-}
+function renderMenuHint(text){var hint=document.getElementById('menu-hint'),el=document.getElementById('menu-hint-items');if(!text||!text.trim()){hint.style.display='none';return;}var items=text.split('\n').filter(function(l){return l.trim();});if(!items.length){hint.style.display='none';return;}hint.style.display='block';el.innerHTML='';items.forEach(function(item){var name=item.split('-')[0].trim(),price=item.includes('-')?item.split('-').slice(1).join('-').trim():'';var btn=document.createElement('button');btn.textContent=name+(price?' ('+price+')':'');btn.style.cssText='padding:6px 12px;border:1.5px solid #c4b5fd;border-radius:20px;background:#fff;color:#7c3aed;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:4px';btn.onclick=function(){var ta=document.getElementById('r-order-text');ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+name+' 1개';ta.focus();};el.appendChild(btn);});}
+function renderSavedMenus(text){if(!text)return;var items=text.split('\n').filter(function(l){return l.trim();});document.getElementById('saved-menu-list').style.display='block';document.getElementById('saved-menu-items').innerHTML=items.map(function(item){return '<div style="padding:7px 12px;background:#f8faff;border-radius:9px;margin-bottom:5px;font-size:14px">'+esc(item)+'</div>';}).join('');}
 
-function renderSavedMenus(text){
-  if(!text)return;
-  var items=text.split('\n').filter(function(l){return l.trim();});
-  document.getElementById('saved-menu-list').style.display='block';
-  document.getElementById('saved-menu-items').innerHTML=items.map(function(item){return '<div style="padding:7px 12px;background:#f8faff;border-radius:9px;margin-bottom:5px;font-size:14px">'+esc(item)+'</div>';}).join('');
-}
-
-function renderChat(chatObj){
+// ══════════ 채팅 ══════════
+async function renderChat(chatObj){
   var msgs=chatObj?Object.entries(chatObj).sort(function(a,b){return a[1].ts-b[1].ts;}):[];
   var newHash=JSON.stringify(msgs.map(function(e){return [e[0],e[1].msg,e[1].reactions];}));
   if(newHash===lastChatLen)return;
   lastChatLen=newHash;
   var el=document.getElementById('chat-messages');
   var atBot=el.scrollHeight-el.scrollTop-el.clientHeight<80;
+
+  // 커스텀 이모지 캐시
+  var customMap={};
+  try{var cs=await db.ref('customEmojis').get();if(cs.exists())customMap=cs.val();}catch(e){}
+
   el.innerHTML=msgs.map(function(entry){
-    var key=entry[0],m=entry[1];
-    var isMe=m.name===myName;
+    var key=entry[0],m=entry[1],isMe=m.name===myName;
     var reactHtml='';
     if(m.reactions){
       Object.entries(m.reactions).forEach(function(re){
-        var emoji=re[0],users=re[1];
+        var emojiKey=re[0],users=re[1];
         if(!users)return;
-        var userEntries=Object.values(users);
-        var cnt=userEntries.length;if(!cnt)return;
-        var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
-        var isMine=!!users[uid];
-        var tooltipText=userEntries.join(', ')+'님이 '+emoji+'로 반응했습니다';
-        reactHtml+='<span class="chat-reaction-chip'+(isMine?' mine':'')+'" data-msgkey="'+key+'" data-emoji="'+esc(emoji)+'">'
-          +emoji+' '+cnt
-          +'<span class="react-tooltip">'+esc(tooltipText)+'</span>'
+        var userVals=Object.values(users),cnt=userVals.length;if(!cnt)return;
+        var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_'),isMine=!!users[uid];
+        var isCustom=emojiKey.startsWith(':')&&emojiKey.endsWith(':');
+        var cname=isCustom?emojiKey.slice(1,-1):'';
+        var displayHtml=isCustom
+          ?'<img src="'+(customMap[cname]?esc(customMap[cname].url):'')+'" style="width:16px;height:16px;object-fit:contain;vertical-align:middle">'
+          :esc(emojiKey);
+        var tooltipImgHtml=isCustom
+          ?'<img src="'+(customMap[cname]?esc(customMap[cname].url):'')+'" style="width:14px;height:14px;object-fit:contain;vertical-align:middle">'
+          :esc(emojiKey);
+        var tooltipText=esc(userVals.join(', '))+'님이 '+tooltipImgHtml+'로 반응했습니다';
+        reactHtml+='<span class="chat-reaction-chip'+(isMine?' mine':'')+'" data-msgkey="'+key+'" data-emoji="'+esc(emojiKey)+'">'
+          +displayHtml+' '+cnt
+          +'<span class="react-tooltip">'+tooltipText+'</span>'
           +'</span>';
       });
     }
-    return '<div class="chat-msg-wrap '+(isMe?'me':'other')+'" data-msgkey="'+key+'">'
+    return '<div class="chat-msg-wrap '+(isMe?'me':'other')+'">'
       +'<div style="display:flex;align-items:flex-end;gap:6px;'+(isMe?'flex-direction:row-reverse':'')+'">'
       +'<div class="chat-msg '+(isMe?'me':'other')+'"><div class="chat-sender">'+esc(m.name)+'</div><div>'+esc(m.msg)+'</div></div>'
-      +'<button class="chat-add-reaction" data-msgkey="'+key+'" title="반응 추가">😊</button>'
+      +'<button class="chat-add-reaction" data-msgkey="'+key+'">😊</button>'
       +'</div>'
       +(reactHtml?'<div class="chat-reactions">'+reactHtml+'</div>':'')
       +'</div>';
   }).join('');
 
-  // 반응 클릭
   el.querySelectorAll('.chat-reaction-chip').forEach(function(chip){
-    chip.onclick=function(e){
-      e.stopPropagation();
-      toggleChatReaction(this.dataset.msgkey,this.dataset.emoji);
-    };
+    chip.onclick=function(e){e.stopPropagation();toggleChatReaction(this.dataset.msgkey,this.dataset.emoji);};
   });
-  // + 버튼 클릭
   el.querySelectorAll('.chat-add-reaction').forEach(function(btn){
-    btn.onclick=function(e){
-      e.stopPropagation();
-      openChatEmojiPicker(this.dataset.msgkey,this);
-    };
+    btn.onclick=function(e){e.stopPropagation();openChatEmojiPicker(this.dataset.msgkey,this);};
   });
-
   if(atBot)el.scrollTop=el.scrollHeight;
 }
 
 function openChatEmojiPicker(msgKey,btnEl){
   curChatMsgKey=msgKey;
   var picker=document.getElementById('chat-emoji-picker');
-  // 기본 탭 초기화
-  var defGrid=document.getElementById('chat-emoji-grid');
-  var cusGrid=document.getElementById('cep-custom-grid');
-  defGrid.style.display='grid'; cusGrid.style.display='none';
-  document.getElementById('cep-tab-def').style.background='#4f6ef7';
-  document.getElementById('cep-tab-def').style.color='#fff';
-  document.getElementById('cep-tab-custom').style.background='transparent';
-  document.getElementById('cep-tab-custom').style.color='#4f6ef7';
-  defGrid.innerHTML=CHAT_EMOJIS.map(function(em){
-    return '<button class="chat-emoji-btn" data-emoji="'+em+'">'+em+'</button>';
-  }).join('');
-  defGrid.querySelectorAll('.chat-emoji-btn').forEach(function(b){
-    b.onclick=function(){toggleChatReaction(curChatMsgKey,this.dataset.emoji);picker.style.display='none';};
-  });
-  // 탭 전환
-  document.getElementById('cep-tab-def').onclick=function(){
+  var defGrid=document.getElementById('chat-emoji-grid-def');
+  var cusGrid=document.getElementById('chat-emoji-grid-custom');
+  var tabDef=document.getElementById('cep-tab-def');
+  var tabCus=document.getElementById('cep-tab-custom');
+
+  // 기본 탭 활성화
+  defGrid.style.display='grid';cusGrid.style.display='none';
+  tabDef.style.background='#4f6ef7';tabDef.style.color='#fff';
+  tabCus.style.background='transparent';tabCus.style.color='#4f6ef7';
+
+  defGrid.innerHTML=CHAT_EMOJIS.map(function(em){return '<button class="chat-emoji-btn">'+em+'</button>';}).join('');
+  defGrid.querySelectorAll('.chat-emoji-btn').forEach(function(b,i){b.onclick=function(){toggleChatReaction(curChatMsgKey,CHAT_EMOJIS[i]);picker.style.display='none';};});
+
+  tabDef.onclick=function(){
     defGrid.style.display='grid';cusGrid.style.display='none';
-    this.style.background='#4f6ef7';this.style.color='#fff';
-    document.getElementById('cep-tab-custom').style.background='transparent';document.getElementById('cep-tab-custom').style.color='#4f6ef7';
+    tabDef.style.background='#4f6ef7';tabDef.style.color='#fff';tabCus.style.background='transparent';tabCus.style.color='#4f6ef7';
   };
-  document.getElementById('cep-tab-custom').onclick=async function(){
+  tabCus.onclick=async function(){
     defGrid.style.display='none';cusGrid.style.display='grid';
-    this.style.background='#4f6ef7';this.style.color='#fff';
-    document.getElementById('cep-tab-def').style.background='transparent';document.getElementById('cep-tab-def').style.color='#4f6ef7';
-    // 커스텀 이모지 로드
+    tabCus.style.background='#4f6ef7';tabCus.style.color='#fff';tabDef.style.background='transparent';tabDef.style.color='#4f6ef7';
+    cusGrid.innerHTML='<div style="color:#aaa;font-size:12px;padding:8px;grid-column:span 7">불러오는 중...</div>';
     var snap=await db.ref('customEmojis').get();
     cusGrid.innerHTML='';
-    if(!snap.exists()){cusGrid.innerHTML='<div style="color:#aaa;font-size:11px;padding:8px;grid-column:span 7">메모판에서 먼저 추가하세요</div>';return;}
+    if(!snap.exists()){cusGrid.innerHTML='<div style="color:#aaa;font-size:12px;padding:8px;grid-column:span 7">메모판에서 먼저 추가하세요</div>';return;}
     Object.entries(snap.val()).forEach(function(e){
-      var btn=document.createElement('button');
-      btn.className='chat-emoji-btn';
-      btn.innerHTML='<img src="'+e[1].url+'" style="width:22px;height:22px;object-fit:contain">';
+      var btn=document.createElement('button');btn.className='chat-emoji-btn';
+      btn.innerHTML='<img src="'+esc(e[1].url)+'" style="width:22px;height:22px;object-fit:contain">';
       btn.onclick=function(){toggleChatReaction(curChatMsgKey,':'+e[0]+':');picker.style.display='none';};
       cusGrid.appendChild(btn);
     });
   };
+
   picker.style.display='block';
   var r=btnEl.getBoundingClientRect();
-  var top=r.top+window.scrollY-180;
-  var left=r.left+window.scrollX-100;
+  var top=r.top+window.scrollY-190;
+  var left=r.left+window.scrollX-110;
   if(top<60)top=r.bottom+window.scrollY+4;
   left=Math.max(8,Math.min(left,window.innerWidth-260));
   picker.style.top=top+'px';picker.style.left=left+'px';
@@ -1191,43 +954,55 @@ async function toggleChatReaction(msgKey,emoji){
   var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
   var path='rooms/'+myCode+'/chat/'+msgKey+'/reactions/'+emoji+'/'+uid;
   var snap=await db.ref(path).get();
-  if(snap.exists())await db.ref(path).remove();
-  else await db.ref(path).set(myName);
+  if(snap.exists())await db.ref(path).remove();else await db.ref(path).set(myName);
 }
 
-// 채팅 피커 외부 클릭 닫기
-document.addEventListener('click',function(e){
-  var picker=document.getElementById('chat-emoji-picker');
-  if(picker&&picker.style.display!=='none'&&!picker.contains(e.target))picker.style.display='none';
-});
+function sendChat(){var msg=document.getElementById('chat-input').value.trim();if(!msg)return;document.getElementById('chat-input').value='';db.ref('rooms/'+myCode+'/chat').push({name:myName,msg:msg,ts:Date.now()});}
 
-function renderHostImages(imgs){
-  var grid=document.getElementById('h-img-grid');
-  grid.innerHTML=(imgs||[]).map(function(s,i){return '<div class="img-card"><img src="'+s+'" data-idx="'+i+'"><button class="del-btn" data-idx="'+i+'">✕</button></div>';}).join('');
-  grid.querySelectorAll('img').forEach(function(el){el.onclick=function(){openLightbox(parseInt(this.dataset.idx));};});
-  grid.querySelectorAll('.del-btn').forEach(function(el){el.onclick=function(){delImg(parseInt(this.dataset.idx));};});
+async function submitOrder(){
+  var order=document.getElementById('r-order-text').value.trim(),memo=document.getElementById('r-memo').value.trim(),pv=document.getElementById('r-price').value,price=pv?parseInt(pv):null;
+  if(!order)return alert('메뉴를 입력해주세요.');var s=await db.ref('rooms/'+myCode+'/open').get();if(!s.val())return alert('주문이 마감되었습니다.');
+  var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');await db.ref('rooms/'+myCode+'/orders/'+key).set({name:myName,order:order,memo:memo,price:price,canceled:false});
 }
+async function cancelOrder(){
+  if(!confirm('주문을 취소하시겠습니까?'))return;var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
+  await db.ref('rooms/'+myCode+'/orders/'+key).update({canceled:true});
+  document.getElementById('r-order-text').value='';document.getElementById('r-price').value='';document.getElementById('r-memo').value='';
+}
+async function deleteRoom(){
+  var s=await db.ref('rooms/'+myCode+'/ownerUid').get();if(s.val()!==cu.uid){alert('방 주인만 삭제 가능합니다.');return;}
+  if(!confirm('방을 삭제하시겠습니까?'))return;await db.ref('rooms/'+myCode).remove();clearSession();stopAll();showRooms();
+}
+async function saveBank(){var bank=document.getElementById('h-bank-input').value.trim();await db.ref('rooms/'+myCode).update({bank:bank});document.getElementById('h-bank-val').textContent=bank;document.getElementById('h-bank-preview').style.display=bank?'block':'none';alert('저장!');}
 
-async function handleImages(input){
-  var files=Array.from(input.files);
-  for(var i=0;i<files.length;i++){
-    await new Promise(function(resolve){
-      var reader=new FileReader();
-      reader.onload=async function(e){var s=await db.ref('rooms/'+myCode+'/images').get();var imgs=s.val()||[];imgs.push(e.target.result);await db.ref('rooms/'+myCode+'/images').set(imgs);resolve();};
-      reader.readAsDataURL(files[i]);
-    });
-  }
-  input.value='';
+async function analyzeMenus(){
+  if(!images.length)return alert('사진을 먼저 올려주세요.');
+  document.getElementById('ai-loading').style.display='block';document.getElementById('ai-result').style.display='none';document.getElementById('ai-btn').disabled=true;
+  try{
+    var parts=images.map(function(b64){var m=b64.match(/^data:([^;]+);base64,/);return {inline_data:{mime_type:m?m[1]:'image/jpeg',data:b64.replace(/^data:[^;]+;base64,/,'')}};});
+    parts.push({text:'이 메뉴판 사진을 보고 메뉴 이름과 가격을 목록으로 추출해줘. 형식은 반드시 "메뉴명 - 가격원" 형태로 한 줄에 하나씩만 출력해. 가격 없으면 메뉴명만. 설명 절대 하지마.'});
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+GEMINI_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:parts}]})});
+    if(!res.ok){var err=await res.json();throw new Error(err.error&&err.error.message||res.status);}
+    var data=await res.json();var text=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text||'').trim();
+    if(!text){alert('인식 실패');return;}document.getElementById('ai-menu-text').value=text;document.getElementById('ai-result').style.display='block';
+  }catch(e){alert('오류: '+e.message);}
+  finally{document.getElementById('ai-loading').style.display='none';document.getElementById('ai-btn').disabled=false;}
 }
+async function saveAiMenus(){var t=document.getElementById('ai-menu-text').value.trim();if(!t)return;await db.ref('rooms/'+myCode).update({menuList:t});renderSavedMenus(t);alert('저장!');}
+async function saveManualMenus(){var t=document.getElementById('ai-menu-text-manual').value.trim();if(!t)return;await db.ref('rooms/'+myCode).update({menuList:t});renderSavedMenus(t);alert('저장!');}
+
+// ══════════ 이미지 ══════════
+function renderHostImages(imgs){var grid=document.getElementById('h-img-grid');grid.innerHTML=(imgs||[]).map(function(s,i){return '<div class="img-card"><img src="'+s+'" data-idx="'+i+'"><button class="del-btn" data-idx="'+i+'">✕</button></div>';}).join('');grid.querySelectorAll('img').forEach(function(el){el.onclick=function(){openLightbox(parseInt(this.dataset.idx));};});grid.querySelectorAll('.del-btn').forEach(function(el){el.onclick=function(){delImg(parseInt(this.dataset.idx));};});}
+async function handleImages(input){var files=Array.from(input.files);for(var i=0;i<files.length;i++){await new Promise(function(resolve){var reader=new FileReader();reader.onload=async function(e){var s=await db.ref('rooms/'+myCode+'/images').get();var imgs=s.val()||[];imgs.push(e.target.result);await db.ref('rooms/'+myCode+'/images').set(imgs);resolve();};reader.readAsDataURL(files[i]);});}input.value='';}
 async function delImg(i){var s=await db.ref('rooms/'+myCode+'/images').get();var imgs=s.val()||[];imgs.splice(i,1);await db.ref('rooms/'+myCode+'/images').set(imgs);}
 function prevImg(){imgIdx=Math.max(0,imgIdx-1);updateImgViewer();}
 function nextImg(){imgIdx=Math.min(images.length-1,imgIdx+1);updateImgViewer();}
 function updateImgViewer(){var img=document.getElementById('p-main-img');img.src=images[imgIdx];img.style.cursor='zoom-in';document.getElementById('img-counter').textContent=(imgIdx+1)+'/'+images.length;}
 
+// ══════════ 라이트박스 ══════════
 var lb={canvas:null,ctx:null,img:new Image(),scale:1,minScale:1,maxScale:10,ox:0,oy:0,dragging:false,lastX:0,lastY:0,touches:[],lastDist:0};
 function lbInit(){
-  lb.canvas=document.getElementById('lb-canvas');lb.ctx=lb.canvas.getContext('2d');
-  lb.img.onload=function(){lbFit();lbDraw();};
+  lb.canvas=document.getElementById('lb-canvas');lb.ctx=lb.canvas.getContext('2d');lb.img.onload=function(){lbFit();lbDraw();};
   lb.canvas.addEventListener('wheel',function(e){e.preventDefault();var r=lb.canvas.getBoundingClientRect();lbZoomAt(e.deltaY<0?1.12:1/1.12,e.clientX-r.left,e.clientY-r.top);},{passive:false});
   lb.canvas.addEventListener('mousedown',function(e){lb.dragging=true;lb.lastX=e.clientX;lb.lastY=e.clientY;lb.canvas.style.cursor='grabbing';});
   window.addEventListener('mousemove',function(e){if(!lb.dragging)return;lb.ox+=e.clientX-lb.lastX;lb.oy+=e.clientY-lb.lastY;lb.lastX=e.clientX;lb.lastY=e.clientY;lbDraw();});
@@ -1246,194 +1021,97 @@ function closeLightbox(){document.getElementById('lightbox').style.display='none
 window.addEventListener('resize',function(){if(document.getElementById('lightbox').style.display!=='none'){lbFit();lbDraw();}});
 function downloadImg(idx){if(!images[idx])return;var a=document.createElement('a');a.href=images[idx];a.download='menu_'+(idx+1)+'.jpg';a.click();}
 
-async function saveBank(){var bank=document.getElementById('h-bank-input').value.trim();await db.ref('rooms/'+myCode).update({bank:bank});document.getElementById('h-bank-val').textContent=bank;document.getElementById('h-bank-preview').style.display=bank?'block':'none';alert('저장!');}
-
-function sendChat(){var msg=document.getElementById('chat-input').value.trim();if(!msg)return;document.getElementById('chat-input').value='';db.ref('rooms/'+myCode+'/chat').push({name:myName,msg:msg,ts:Date.now()});}
-
-async function submitOrder(){
-  var order=document.getElementById('r-order-text').value.trim();
-  var memo=document.getElementById('r-memo').value.trim();
-  var pv=document.getElementById('r-price').value;
-  var price=pv?parseInt(pv):null;
-  if(!order)return alert('메뉴를 입력해주세요.');
-  var s=await db.ref('rooms/'+myCode+'/open').get();
-  if(!s.val())return alert('주문이 마감되었습니다.');
-  var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
-  await db.ref('rooms/'+myCode+'/orders/'+key).set({name:myName,order:order,memo:memo,price:price,canceled:false});
-}
-async function cancelOrder(){
-  if(!confirm('주문을 취소하시겠습니까?'))return;
-  var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
-  await db.ref('rooms/'+myCode+'/orders/'+key).update({canceled:true});
-  document.getElementById('r-order-text').value='';document.getElementById('r-price').value='';document.getElementById('r-memo').value='';
-}
-async function deleteRoom(){
-  var s=await db.ref('rooms/'+myCode+'/ownerUid').get();
-  if(s.val()!==cu.uid){alert('방 주인만 삭제 가능합니다.');return;}
-  if(!confirm('방을 삭제하시겠습니까?'))return;
-  await db.ref('rooms/'+myCode).remove();
-  clearSession();stopAll();showRooms();
-}
-
-async function analyzeMenus(){
-  if(!images.length)return alert('사진을 먼저 올려주세요.');
-  document.getElementById('ai-loading').style.display='block';
-  document.getElementById('ai-result').style.display='none';
-  document.getElementById('ai-btn').disabled=true;
-  try{
-    var parts=images.map(function(b64){var m=b64.match(/^data:([^;]+);base64,/);return {inline_data:{mime_type:m?m[1]:'image/jpeg',data:b64.replace(/^data:[^;]+;base64,/,'')}}; });
-    parts.push({text:'이 메뉴판 사진을 보고 메뉴 이름과 가격을 목록으로 추출해줘. 형식은 반드시 "메뉴명 - 가격원" 형태로 한 줄에 하나씩만 출력해. 가격 없으면 메뉴명만. 설명 절대 하지마.'});
-    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+GEMINI_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:parts}]})});
-    if(!res.ok){var err=await res.json();throw new Error(err.error&&err.error.message||res.status);}
-    var data=await res.json();
-    var text=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text||'').trim();
-    if(!text){alert('인식 실패');return;}
-    document.getElementById('ai-menu-text').value=text;
-    document.getElementById('ai-result').style.display='block';
-  }catch(e){alert('오류: '+e.message);}
-  finally{document.getElementById('ai-loading').style.display='none';document.getElementById('ai-btn').disabled=false;}
-}
-async function saveAiMenus(){var t=document.getElementById('ai-menu-text').value.trim();if(!t)return;await db.ref('rooms/'+myCode).update({menuList:t});renderSavedMenus(t);alert('저장!');}
-async function saveManualMenus(){var t=document.getElementById('ai-menu-text-manual').value.trim();if(!t)return;await db.ref('rooms/'+myCode).update({menuList:t});renderSavedMenus(t);alert('저장!');}
-
 // ══════════ 메모판 ══════════
 function initMemo(){
-  document.getElementById('memo-color-btns').addEventListener('click',function(e){
-    var btn=e.target.closest('[data-color]');
-    if(!btn)return;
-    memoColor=btn.dataset.color;
-    document.querySelectorAll('#memo-color-btns [data-color]').forEach(function(b){b.style.border='2px solid transparent';});
-    btn.style.border='3px solid #4f6ef7';
-  });
+  document.getElementById('memo-color-btns').addEventListener('click',function(e){var btn=e.target.closest('[data-color]');if(!btn)return;memoColor=btn.dataset.color;document.querySelectorAll('#memo-color-btns [data-color]').forEach(function(b){b.style.border='2px solid transparent';});btn.style.border='3px solid #4f6ef7';});
   document.getElementById('memo-save-btn').onclick=async function(){
-    var content=document.getElementById('memo-content').value.trim();
-    if(!content)return alert('내용을 입력해주세요.');
-    var board=document.getElementById('memo-board');
-    var bw=board.offsetWidth;
-    var x=Math.max(0,Math.min(memoClickX-80,bw-170));
-    var y=Math.max(30,memoClickY-20);
+    var content=document.getElementById('memo-content').value.trim();if(!content)return alert('내용을 입력해주세요.');
+    var board=document.getElementById('memo-board'),bw=board.offsetWidth;var x=Math.max(0,Math.min(memoClickX-80,bw-170)),y=Math.max(30,memoClickY-20);
     await db.ref('memos').push({content:content,color:memoColor,x:x,y:y,author:myName,uid:cu.uid,ts:Date.now()});
     document.getElementById('memo-modal').style.display='none';
   };
   document.getElementById('memo-cancel-btn').onclick=function(){document.getElementById('memo-modal').style.display='none';};
   document.getElementById('memo-modal').onclick=function(e){if(e.target===this)this.style.display='none';};
   document.getElementById('memo-board').addEventListener('click',function(e){
-    if(e.target.closest('.memo-note'))return;
-    if(e.target.closest('.epicker'))return;
-    var r=this.getBoundingClientRect();
-    memoClickX=e.clientX-r.left;memoClickY=e.clientY-r.top;
-    document.getElementById('memo-content').value='';
-    document.getElementById('memo-modal').style.display='flex';
+    if(e.target.closest('.memo-note')||e.target.closest('.epicker'))return;
+    var r=this.getBoundingClientRect();memoClickX=e.clientX-r.left;memoClickY=e.clientY-r.top;
+    document.getElementById('memo-content').value='';document.getElementById('memo-modal').style.display='flex';
     setTimeout(function(){document.getElementById('memo-content').focus();},100);
   });
-  document.getElementById('ep-tab-def').onclick=function(){
-    this.classList.add('active');document.getElementById('ep-tab-custom').classList.remove('active');
-    document.getElementById('ep-grid-def').style.display='grid';document.getElementById('ep-custom').style.display='none';
-  };
-  document.getElementById('ep-tab-custom').onclick=function(){
-    this.classList.add('active');document.getElementById('ep-tab-def').classList.remove('active');
-    document.getElementById('ep-grid-def').style.display='none';document.getElementById('ep-custom').style.display='block';
-    loadCustomEmojis();
-  };
+  document.getElementById('ep-tab-def').onclick=function(){this.classList.add('active');document.getElementById('ep-tab-custom').classList.remove('active');document.getElementById('ep-grid-def').style.display='grid';document.getElementById('ep-custom').style.display='none';};
+  document.getElementById('ep-tab-custom').onclick=function(){this.classList.add('active');document.getElementById('ep-tab-def').classList.remove('active');document.getElementById('ep-grid-def').style.display='none';document.getElementById('ep-custom').style.display='block';loadCustomEmojis();};
   document.getElementById('ep-grid-def').innerHTML=DEFAULT_EMOJIS.map(function(em){return '<button class="epicker-btn" data-emoji="'+em+'">'+em+'</button>';}).join('');
   document.getElementById('ep-grid-def').addEventListener('click',function(e){var btn=e.target.closest('.epicker-btn');if(btn)doAddReaction(btn.dataset.emoji);});
   document.getElementById('ep-upload-area').onclick=function(){document.getElementById('ep-file').click();};
   document.getElementById('ep-file').onchange=function(){uploadCustomEmoji(this);};
-  document.addEventListener('click',function(e){
-    var picker=document.getElementById('epicker');
-    if(!picker||picker.style.display==='none')return;
-    if(!picker.contains(e.target)&&!e.target.classList.contains('reaction-add'))picker.style.display='none';
-  });
+  document.addEventListener('click',function(e){var picker=document.getElementById('epicker');if(!picker||picker.style.display==='none')return;if(!picker.contains(e.target)&&!e.target.classList.contains('reaction-add'))picker.style.display='none';});
 }
 
 async function loadCustomEmojis(){
-  var snap=await db.ref('customEmojis').get();
-  var grid=document.getElementById('ep-grid-custom');
+  var snap=await db.ref('customEmojis').get();var grid=document.getElementById('ep-grid-custom');
   if(!snap.exists()){grid.innerHTML='<div style="color:#aaa;font-size:12px;padding:8px;grid-column:span 7">아직 없어요</div>';return;}
   grid.innerHTML='';
-  Object.entries(snap.val()).forEach(function(e){
-    var btn=document.createElement('button');
-    btn.className='epicker-btn';btn.dataset.cname=e[0];
-    btn.innerHTML='<img src="'+e[1].url+'" style="width:22px;height:22px;object-fit:contain">';
-    btn.onclick=function(){doAddReaction(':'+e[0]+':');};
-    grid.appendChild(btn);
-  });
+  Object.entries(snap.val()).forEach(function(e){var btn=document.createElement('button');btn.className='epicker-btn';btn.dataset.cname=e[0];btn.innerHTML='<img src="'+e[1].url+'" style="width:22px;height:22px;object-fit:contain">';btn.onclick=function(){doAddReaction(':'+e[0]+':');};grid.appendChild(btn);});
 }
 
 async function uploadCustomEmoji(input){
-  var file=input.files[0];if(!file)return;
-  if(file.size>200*1024){alert('200KB 이하만 가능해요!');return;}
+  var file=input.files[0];if(!file)return;if(file.size>200*1024){alert('200KB 이하만 가능해요!');return;}
   var name=file.name.replace(/\.[^/.]+$/,'').replace(/[^a-zA-Z0-9가-힣_]/g,'_');
-  var reader=new FileReader();
-  reader.onload=async function(e){
-    await db.ref('customEmojis/'+name).set({url:e.target.result,uploadedBy:myName,ts:Date.now()});
-    loadCustomEmojis();alert(':'+name+': 추가됐어요!');
-  };
-  reader.readAsDataURL(file);input.value='';
+  var reader=new FileReader();reader.onload=async function(e){await db.ref('customEmojis/'+name).set({url:e.target.result,uploadedBy:myName,ts:Date.now()});loadCustomEmojis();alert(':'+name+': 추가됐어요!');};reader.readAsDataURL(file);input.value='';
 }
 
 function openEpicker(memoKey,btnEl){
-  curEmojiKey=memoKey;
-  var picker=document.getElementById('epicker');picker.style.display='block';
-  var board=document.getElementById('memo-board');
-  var br=board.getBoundingClientRect(),btnR=btnEl.getBoundingClientRect();
+  curEmojiKey=memoKey;var picker=document.getElementById('epicker');picker.style.display='block';
+  var board=document.getElementById('memo-board'),br=board.getBoundingClientRect(),btnR=btnEl.getBoundingClientRect();
   var left=btnR.left-br.left-265,top=btnR.top-br.top-220;
   if(left<4)left=btnR.right-br.left+4;if(top<30)top=btnR.bottom-br.top+4;
   picker.style.left=Math.max(4,Math.min(left,br.width-270))+'px';picker.style.top=Math.max(30,top)+'px';
 }
 
 async function doAddReaction(emoji){
-  if(!curEmojiKey)return;
-  document.getElementById('epicker').style.display='none';
+  if(!curEmojiKey)return;document.getElementById('epicker').style.display='none';
   var safeKey=emoji.replace(/[^a-zA-Z0-9가-힣_:]/g,function(c){return '_x'+c.codePointAt(0).toString(16)+'_';});
-  var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
-  var path='memos/'+curEmojiKey+'/reactions/'+safeKey+'/'+uid;
-  var snap=await db.ref(path).get();
-  if(snap.exists())await db.ref(path).remove();
-  else await db.ref(path).set(myName);
+  var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');var path='memos/'+curEmojiKey+'/reactions/'+safeKey+'/'+uid;
+  var snap=await db.ref(path).get();if(snap.exists())await db.ref(path).remove();else await db.ref(path).set(myName);
 }
 
 function loadMemos(){
   if(memoLis){try{db.ref('memos').off('value',memoLis);}catch(e){} memoLis=null;}
   var container=document.getElementById('memo-items');
   memoLis=db.ref('memos').on('value',function(snap){
-    container.innerHTML='';
-    if(!snap.exists())return;
+    container.innerHTML='';if(!snap.exists())return;
     var board=document.getElementById('memo-board'),bh=600;
     Object.entries(snap.val()).forEach(function(entry){
-      var k=entry[0],m=entry[1];
-      if((m.y||0)+200>bh)bh=(m.y||0)+220;
+      var k=entry[0],m=entry[1];if((m.y||0)+200>bh)bh=(m.y||0)+220;
       var rhtml='';
       if(m.reactions){
         Object.entries(m.reactions).forEach(function(re){
-          var safeKey=re[0],users=re[1];
-          if(!users)return;
+          var safeKey=re[0],users=re[1];if(!users)return;
           var cnt=Object.keys(users).length;if(!cnt)return;
-          var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
-          var isMine=!!users[uid];
+          var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_'),isMine=!!users[uid];
           var emoji=safeKey.replace(/_x([0-9a-f]+)_/g,function(_,h){try{return String.fromCodePoint(parseInt(h,16));}catch(e){return '';}});
           var isCustom=safeKey.startsWith(':')&&safeKey.endsWith(':');
           var display=isCustom?'<img data-cn="'+esc(safeKey.slice(1,-1))+'" style="width:14px;height:14px;vertical-align:middle">':emoji;
           var userNames=Object.values(users);
-          var tooltipText=esc(userNames.join(', ')+'님이 '+(isCustom?safeKey:emoji)+'로 반응했습니다');
+          var tooltipDisplay=isCustom?'<img data-cn2="'+esc(safeKey.slice(1,-1))+'" style="width:13px;height:13px;vertical-align:middle">':emoji;
+          var tooltipText=esc(userNames.join(', '))+'님이 '+tooltipDisplay+'로 반응했습니다';
           rhtml+='<span class="reaction-chip'+(isMine?' mine':'')+'" data-rkey="'+esc(safeKey)+'">'+display+' '+cnt+'<span class="react-tooltip">'+tooltipText+'</span></span>';
         });
       }
       var div=document.createElement('div');
-      div.className='memo-note';
-      div.style.left=(m.x||0)+'px';div.style.top=(m.y||30)+'px';div.style.background=m.color||'#fef9c3';div.style.position='absolute';
+      div.className='memo-note';div.style.left=(m.x||0)+'px';div.style.top=(m.y||30)+'px';div.style.background=m.color||'#fef9c3';div.style.position='absolute';
       div.innerHTML='<button class="memo-del">✕</button><div class="memo-author">📌 '+esc(m.author)+'</div><div style="font-size:13px;line-height:1.5;word-break:break-all;white-space:pre-wrap">'+esc(m.content)+'</div><div class="memo-reactions">'+rhtml+'<button class="reaction-add">+</button></div>';
+
+      // 커스텀 이모지 이미지 로드 (반응 칩 + 툴팁)
       div.querySelectorAll('img[data-cn]').forEach(async function(img){var s=await db.ref('customEmojis/'+img.dataset.cn).get();if(s.exists())img.src=s.val().url;});
+      div.querySelectorAll('img[data-cn2]').forEach(async function(img){var s=await db.ref('customEmojis/'+img.dataset.cn2).get();if(s.exists())img.src=s.val().url;});
+
       div.querySelectorAll('.reaction-chip').forEach(function(chip){chip.onclick=function(e){e.stopPropagation();curEmojiKey=k;doAddReaction(this.dataset.rkey);};});
       div.querySelector('.reaction-add').onclick=function(e){e.stopPropagation();openEpicker(k,this);};
       div.querySelector('.memo-del').onclick=function(e){e.stopPropagation();if(m.uid===cu.uid||window.confirm('삭제하시겠습니까?'))db.ref('memos/'+k).remove();};
+
       var drag=false,ox=0,oy=0,moved=false;
-      div.addEventListener('mousedown',function(e){
-        if(e.target.classList.contains('memo-del')||e.target.classList.contains('reaction-add')||e.target.classList.contains('reaction-chip'))return;
-        e.preventDefault();e.stopPropagation();drag=true;moved=false;
-        var r=div.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;
-        div.style.cursor='grabbing';div.style.zIndex='500';
-      });
+      div.addEventListener('mousedown',function(e){if(e.target.classList.contains('memo-del')||e.target.classList.contains('reaction-add')||e.target.classList.contains('reaction-chip'))return;e.preventDefault();e.stopPropagation();drag=true;moved=false;var r=div.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;div.style.cursor='grabbing';div.style.zIndex='500';});
       function onMM(e){if(!drag)return;moved=true;var br=board.getBoundingClientRect();var nx=e.clientX-br.left-ox,ny=e.clientY-br.top-oy;nx=Math.max(0,Math.min(nx,br.width-170));ny=Math.max(30,ny);div.style.left=nx+'px';div.style.top=ny+'px';}
       function onMU(){if(!drag)return;drag=false;div.style.cursor='grab';div.style.zIndex='';if(moved)db.ref('memos/'+k).update({x:parseFloat(div.style.left),y:parseFloat(div.style.top)});}
       document.addEventListener('mousemove',onMM);document.addEventListener('mouseup',onMU);
@@ -1451,7 +1129,7 @@ function stopAll(){
   if(memoLis){try{db.ref('memos').off('value',memoLis);}catch(e){} memoLis=null;}
   if(pollTmr){clearInterval(pollTmr);pollTmr=null;}
   if(rankTmr){clearInterval(rankTmr);rankTmr=null;}
-  lastChatLen=0;
+  lastChatLen='';
 }
 </script>
 </body>
