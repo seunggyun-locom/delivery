@@ -897,7 +897,7 @@ async function analyzeMenus(){
       return {inline_data:{mime_type:mime?mime[1]:'image/jpeg',data:b64.replace(/^data:[^;]+;base64,/,'')}};
     });
     parts.push({text:'이 메뉴판 사진을 보고 메뉴 이름과 가격을 목록으로 추출해줘. 형식은 반드시 "메뉴명 - 가격원" 형태로 한 줄에 하나씩만 출력해. 예시:\n짬뽕 - 9000원\n탕수육 - 15000원\n가격이 없으면 메뉴명만 써줘. 다른 설명은 절대 하지마.'});
-    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+GEMINI_KEY,{
+    var res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+GEMINI_KEY,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{parts:parts}]})
