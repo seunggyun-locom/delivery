@@ -99,7 +99,16 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 .rank-tab{flex:1;padding:7px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:#4f6ef7;transition:all .2s}
 .rank-tab.active{background:#4f6ef7;color:#fff}
 
-/* 토스트 */
+/* 메모 */
+.memo-note{position:absolute;width:160px;min-height:120px;border-radius:4px;padding:14px 12px 10px;box-shadow:3px 3px 10px rgba(0,0,0,.15);cursor:pointer;font-size:13px;line-height:1.5;word-break:break-all;transition:transform .1s}
+.memo-note:hover{transform:scale(1.04);z-index:10}
+.memo-note .memo-author{font-size:11px;font-weight:700;opacity:.6;margin-bottom:6px}
+.memo-note .memo-del{position:absolute;top:4px;right:6px;background:none;border:none;cursor:pointer;font-size:14px;opacity:0;transition:opacity .2s}
+.memo-note:hover .memo-del{opacity:1}
+
+/* 메모 모달 */
+#memo-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9997;align-items:center;justify-content:center;padding:20px}
+.memo-modal-box{background:#fff;border-radius:20px;padding:28px;max-width:380px;width:100%}
 .toast-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px}
 .toast-box{background:#fff;border-radius:20px;padding:28px;max-width:340px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.2);animation:toastIn .25s ease}
 @keyframes toastIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
@@ -169,6 +178,7 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
       <div style="display:flex;gap:0;margin-bottom:16px;background:#e8edff;border-radius:12px;padding:4px">
         <button id="tab-pub" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;background:#4f6ef7;color:#fff">🌐 자유 참여</button>
         <button id="tab-priv" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;background:transparent;color:#4f6ef7">🔒 비밀 방</button>
+        <button id="tab-memo" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;background:transparent;color:#4f6ef7">📌 메모판</button>
       </div>
       <div id="tab-public-content">
         <div id="public-rooms-list"><div style="color:#aaa;text-align:center;padding:30px">불러오는 중...</div></div>
@@ -179,6 +189,13 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
           <label>방 코드</label>
           <input id="priv-code" placeholder="AB12" maxlength="4" style="text-transform:uppercase;font-size:24px;font-weight:800;letter-spacing:6px;text-align:center;margin-bottom:14px">
           <button class="btn-p" id="join-private-btn">입장하기 →</button>
+        </div>
+      </div>
+      <div id="tab-memo-content" style="display:none">
+        <!-- 메모판 -->
+        <div style="position:relative;width:100%;background:#fefce8;border-radius:16px;min-height:600px;border:2px dashed #fde68a;overflow:hidden;cursor:crosshair" id="memo-board">
+          <div style="position:absolute;top:12px;left:12px;font-size:13px;color:#d97706;font-weight:600;pointer-events:none">📌 빈 곳을 클릭해서 메모를 남겨보세요!</div>
+          <div id="memo-items"></div>
         </div>
       </div>
     </div>
@@ -290,6 +307,32 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
     <div style="display:flex;gap:10px">
       <button id="cancel-create-btn" style="flex:1;padding:12px;border:2px solid #dde1f0;border-radius:10px;background:#fff;font-weight:600;cursor:pointer">취소</button>
       <button id="confirm-create-btn" style="flex:1;padding:12px;border:none;border-radius:10px;background:#4f6ef7;color:#fff;font-weight:600;cursor:pointer">만들기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 메모 작성 모달 -->
+<div id="memo-modal">
+  <div class="memo-modal-box">
+    <h3 style="font-size:17px;font-weight:700;margin-bottom:16px">📌 메모 작성</h3>
+    <div style="margin-bottom:12px">
+      <label>내용</label>
+      <textarea id="memo-content" rows="4" placeholder="메모 내용을 입력하세요..." style="resize:none"></textarea>
+    </div>
+    <div style="margin-bottom:16px">
+      <label>색깔</label>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <div class="memo-color-btn" data-color="#fef9c3" style="width:28px;height:28px;background:#fef9c3;border-radius:50%;cursor:pointer;border:3px solid #4f6ef7"></div>
+        <div class="memo-color-btn" data-color="#dcfce7" style="width:28px;height:28px;background:#dcfce7;border-radius:50%;cursor:pointer;border:2px solid transparent"></div>
+        <div class="memo-color-btn" data-color="#dbeafe" style="width:28px;height:28px;background:#dbeafe;border-radius:50%;cursor:pointer;border:2px solid transparent"></div>
+        <div class="memo-color-btn" data-color="#fce7f3" style="width:28px;height:28px;background:#fce7f3;border-radius:50%;cursor:pointer;border:2px solid transparent"></div>
+        <div class="memo-color-btn" data-color="#ffe4e6" style="width:28px;height:28px;background:#ffe4e6;border-radius:50%;cursor:pointer;border:2px solid transparent"></div>
+        <div class="memo-color-btn" data-color="#f3e8ff" style="width:28px;height:28px;background:#f3e8ff;border-radius:50%;cursor:pointer;border:2px solid transparent"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button id="memo-cancel-btn" style="flex:1;padding:12px;border:2px solid #dde1f0;border-radius:10px;background:#fff;font-weight:600;cursor:pointer">취소</button>
+      <button id="memo-save-btn" style="flex:1;padding:12px;border:none;border-radius:10px;background:#4f6ef7;color:#fff;font-weight:600;cursor:pointer">붙이기 📌</button>
     </div>
   </div>
 </div>
@@ -551,6 +594,40 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('type-private').addEventListener('click',function(){selType('private');});
   document.getElementById('tab-pub').addEventListener('click',function(){switchTab('public');});
   document.getElementById('tab-priv').addEventListener('click',function(){switchTab('private');});
+  document.getElementById('tab-memo').addEventListener('click',function(){switchTab('memo');});
+
+  // 메모판 클릭
+  var memoClickX=0, memoClickY=0, memoColor='#fef9c3';
+  document.getElementById('memo-board').addEventListener('click',function(e){
+    if(e.target.closest('.memo-note'))return;
+    var rect=this.getBoundingClientRect();
+    memoClickX=e.clientX-rect.left;
+    memoClickY=e.clientY-rect.top;
+    document.getElementById('memo-content').value='';
+    document.getElementById('memo-modal').style.display='flex';
+    setTimeout(function(){document.getElementById('memo-content').focus();},100);
+  });
+  document.getElementById('memo-cancel-btn').addEventListener('click',function(){document.getElementById('memo-modal').style.display='none';});
+  document.getElementById('memo-save-btn').addEventListener('click',function(){
+    var content=document.getElementById('memo-content').value.trim();
+    if(!content)return alert('내용을 입력해주세요.');
+    db.ref('memos').push({
+      content:content,color:memoColor,
+      x:Math.max(0,Math.min(memoClickX-80,document.getElementById('memo-board').offsetWidth-170)),
+      y:Math.max(30,memoClickY-20),
+      author:myName,uid:currentUser.uid,ts:Date.now()
+    });
+    document.getElementById('memo-modal').style.display='none';
+  });
+  document.querySelectorAll('.memo-color-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      memoColor=this.dataset.color;
+      document.querySelectorAll('.memo-color-btn').forEach(function(b){b.style.border='2px solid transparent';});
+      this.style.border='3px solid #4f6ef7';
+    });
+  });
+  document.getElementById('memo-modal').addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
+
   document.getElementById('join-private-btn').addEventListener('click',joinPrivate);
   document.getElementById('priv-code').addEventListener('keydown',function(e){if(e.key==='Enter')joinPrivate();});
   document.getElementById('priv-code').addEventListener('input',function(){this.value=this.value.toUpperCase();});
@@ -633,8 +710,10 @@ function switchTab(tab){
   currentTab=tab;
   document.getElementById('tab-public-content').style.display=tab==='public'?'block':'none';
   document.getElementById('tab-private-content').style.display=tab==='private'?'block':'none';
-  document.getElementById('tab-pub').style.cssText='flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;background:'+(tab==='public'?'#4f6ef7':'transparent')+';color:'+(tab==='public'?'#fff':'#4f6ef7');
-  document.getElementById('tab-priv').style.cssText='flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;background:'+(tab==='private'?'#4f6ef7':'transparent')+';color:'+(tab==='private'?'#fff':'#4f6ef7');
+  document.getElementById('tab-memo-content').style.display=tab==='memo'?'block':'none';
+  var s=function(id,on){document.getElementById(id).style.cssText='flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;background:'+(on?'#4f6ef7':'transparent')+';color:'+(on?'#fff':'#4f6ef7');};
+  s('tab-pub',tab==='public');s('tab-priv',tab==='private');s('tab-memo',tab==='memo');
+  if(tab==='memo') loadMemos();
 }
 
 async function loadPublicRooms(){
@@ -1112,6 +1191,37 @@ async function saveManualMenus(){
   if(!text)return;
   await db.ref('rooms/'+myCode).update({menuList:text});
   renderSavedMenus(text);alert('메뉴 목록이 저장되었습니다!');
+}
+
+// ── 메모판 ──
+var memoListener=null;
+function loadMemos(){
+  if(memoListener){db.ref('memos').off('value',memoListener);memoListener=null;}
+  memoListener=db.ref('memos').on('value',function(snap){
+    var container=document.getElementById('memo-items');
+    container.innerHTML='';
+    if(!snap.exists())return;
+    var board=document.getElementById('memo-board');
+    var bh=600;
+    Object.entries(snap.val()).forEach(function(e){
+      var k=e[0],m=e[1];
+      if(m.y+120>bh) bh=m.y+140;
+      var div=document.createElement('div');
+      div.className='memo-note';
+      div.style.cssText='left:'+m.x+'px;top:'+m.y+'px;background:'+m.color+';';
+      div.innerHTML='<button class="memo-del" title="삭제">✕</button>'
+        +'<div class="memo-author">📌 '+esc(m.author)+'</div>'
+        +'<div>'+esc(m.content)+'</div>';
+      div.querySelector('.memo-del').addEventListener('click',function(e){
+        e.stopPropagation();
+        if(m.uid===currentUser.uid||confirm('이 메모를 삭제하시겠습니까?')){
+          db.ref('memos/'+k).remove();
+        }
+      });
+      container.appendChild(div);
+      board.style.minHeight=bh+'px';
+    });
+  });
 }
 
 async function loadStoreRanking(){
