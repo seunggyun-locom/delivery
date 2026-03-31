@@ -125,9 +125,63 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 .empty-rooms{text-align:center;padding:36px 20px;color:#aaa}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center;padding:20px}
 .modal-box{background:#fff;border-radius:20px;padding:28px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto}
+
+/* 룰렛 탭 */
+#tab-roulette-content{display:none}
+.roulette-wrap{display:grid;grid-template-columns:1fr 300px;gap:16px}
+@media(max-width:700px){.roulette-wrap{grid-template-columns:1fr}}
+.r-store-panel{background:#fff;border-radius:16px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,.08);display:flex;flex-direction:column;max-height:580px}
+.r-search{width:100%;padding:9px 12px;border:1.5px solid #dde1f0;border-radius:10px;font-size:14px;outline:none;margin-bottom:10px}
+.r-search:focus{border-color:#4f6ef7}
+.r-store-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.r-store-btn{text-align:left;padding:8px 12px;font-size:14px;border:1.5px solid #eee;border-radius:10px;background:#fff;color:#1a1a2e;cursor:pointer;transition:all .15s;font-family:inherit}
+.r-store-btn:hover{background:#eef1ff;border-color:#4f6ef7;color:#4f6ef7}
+.r-store-btn.r-added{background:#e8f5e9;border-color:#43a047;color:#2e7d32;font-weight:600}
+.r-panel{display:flex;flex-direction:column;gap:12px}
+.r-slots{display:flex;flex-wrap:wrap;gap:6px;min-height:36px;padding:10px;background:#f8faff;border-radius:12px;border:1.5px dashed #c0caff}
+.r-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#fff;border:1.5px solid #4f6ef7;border-radius:20px;font-size:13px;color:#4f6ef7;font-weight:600}
+.r-chip-rm{background:none;border:none;cursor:pointer;font-size:14px;color:#aaa;padding:0;line-height:1}
+.r-chip-rm:hover{color:#ff4d4d}
+.r-canvas-wrap{position:relative;width:100%;aspect-ratio:1}
+#r-wheel{width:100%;height:100%;border-radius:50%;display:block}
+.r-pointer{position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:30px solid #e53935;filter:drop-shadow(0 2px 6px rgba(229,57,53,.5));z-index:5}
+.r-spin-btn{padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#e53935,#ff7043);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:all .15s;box-shadow:0 4px 15px rgba(229,57,53,.3)}
+.r-spin-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(229,57,53,.4)}
+.r-spin-btn:active{transform:scale(.98)}
+.r-spin-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.r-hint{font-size:13px;color:#aaa;text-align:center;padding:8px}
+
+/* 룰렛 결과 오버레이 */
+#r-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center}
+.r-result-box{background:#fff;border-radius:24px;padding:36px 48px;text-align:center;animation:rpop .5s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+@keyframes rpop{from{transform:scale(.3) rotate(-10deg);opacity:0}to{transform:scale(1) rotate(0deg);opacity:1}}
+.r-result-emoji{font-size:56px;margin-bottom:10px;animation:bounce 1s infinite alternate}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+.r-result-sub{font-size:14px;color:#888;margin-bottom:8px}
+.r-result-name{font-size:30px;font-weight:800;color:#1a1a2e;margin-bottom:12px}
+.r-result-badge{display:inline-block;background:linear-gradient(135deg,#e53935,#ff7043);color:#fff;font-size:16px;font-weight:700;padding:8px 28px;border-radius:30px;box-shadow:0 4px 15px rgba(229,57,53,.4);animation:glow 1.5s ease-in-out infinite alternate}
+@keyframes glow{from{box-shadow:0 4px 15px rgba(229,57,53,.4)}to{box-shadow:0 4px 30px rgba(229,57,53,.8)}}
+.r-result-close{margin-top:20px;display:block;width:100%;padding:12px;border:2px solid #eee;border-radius:12px;background:#fff;color:#888;font-size:14px;font-weight:600;cursor:pointer}
+.r-result-close:hover{background:#f8faff;border-color:#4f6ef7;color:#4f6ef7}
+
+/* 폭죽 캔버스 */
+#r-confetti{position:fixed;inset:0;pointer-events:none;z-index:8999}
 </style>
 </head>
 <body>
+
+<canvas id="r-confetti"></canvas>
+
+<!-- 룰렛 결과 오버레이 -->
+<div id="r-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;align-items:center;justify-content:center">
+  <div class="r-result-box">
+    <div class="r-result-emoji">🎉</div>
+    <div class="r-result-sub">오늘의 배달음식은...</div>
+    <div class="r-result-name" id="r-res-name">-</div>
+    <div class="r-result-badge">✨ 당첨! ✨</div>
+    <button class="r-result-close" onclick="rCloseResult()">다시 돌리기 / 닫기</button>
+  </div>
+</div>
 
 <!-- 로그인 -->
 <div id="s-auth" class="screen active">
@@ -170,6 +224,7 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
         <button class="tab-btn active" id="tab-pub" data-tab="public" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:#4f6ef7;color:#fff">🌐 자유참여</button>
         <button class="tab-btn" id="tab-priv" data-tab="private" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">🔒 비밀방</button>
         <button class="tab-btn" id="tab-memo" data-tab="memo" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">📌 메모판</button>
+        <button class="tab-btn" id="tab-roulette" data-tab="roulette" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">🎡 룰렛</button>
       </div>
       <div id="tab-public-content"><div id="public-rooms-list"><div style="color:#aaa;text-align:center;padding:30px">불러오는 중...</div></div></div>
       <div id="tab-private-content" style="display:none">
@@ -197,6 +252,26 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
                 🖼️ PNG/GIF 업로드 (200KB 이하)
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 룰렛 탭 -->
+      <div id="tab-roulette-content" style="display:none">
+        <div class="roulette-wrap">
+          <div class="r-store-panel">
+            <div style="font-weight:700;font-size:16px;margin-bottom:10px">🍽️ 가게 목록 <span style="font-size:12px;font-weight:400;color:#aaa">클릭하면 룰렛에 추가</span></div>
+            <input class="r-search" id="r-search" placeholder="🔍 가게 검색...">
+            <div class="r-store-list" id="r-store-list"></div>
+          </div>
+          <div class="r-panel">
+            <div style="font-weight:700;font-size:15px;color:#1a1a2e">🎡 룰렛 (<span id="r-cnt">0</span>개)</div>
+            <div class="r-slots" id="r-slots"><span style="font-size:13px;color:#bbb">← 가게를 추가하세요</span></div>
+            <div class="r-canvas-wrap">
+              <div class="r-pointer"></div>
+              <canvas id="r-wheel" width="600" height="600"></canvas>
+            </div>
+            <button class="r-spin-btn" id="r-spin-btn" onclick="rSpin()" disabled>🎡 돌리기!</button>
           </div>
         </div>
       </div>
@@ -453,6 +528,164 @@ var COLOR_MAP={red:{bg:'#fdecea',border:'#e53935',dot:'#e53935',label:'맛없음
 var DEFAULT_EMOJIS=['👍','😂','❤️','🔥','😮','😢','👏','🎉','😍','🤔','😡','🥹','💀','🫡','🤣','😎','🥰','🫶','✅','💯'];
 var curEmojiKey=null,memoClickX=0,memoClickY=0,memoColor='#fef9c3';
 
+// ══════════ 룰렛 ══════════
+var ROULETTE_STORES=['GTS버거','고돼지','고봉민김밥','교동홀도시락','국수나무','꾸이한끼','담솔','대한냉면','던킨도너츠','롯데리아','마녀김밥','마시어때','마왕족발','맘스터치','맥도날드','문막집','바스버거','백나예김밥','백소정','버거킹','버텍스','본도시락','본죽','봉구스밥버거','상아김밥','샐러디','샐러드박스','서브웨이','슬로우캘리','스쿨푸드','싸움의고수','쌍팔반점','숯불고기냉면','수타우동젠','암샘김밥','영심이떡볶이김밥','오니기리와이규동','오레노카츠','오토김밥','올라포케','올레샐러드','올리아테이블','우리할매떡볶이','이삭토스트','인생냉면','잭슨피자','진된장','진부엉이꼬마김밥','죽도령','처갓집양념치킨','청년홍국수','칠리로29','KFC','킹콩부대찌개','퀴즈노스','탄탄면공방','판미각','파스타예요','플램잭트리','하루엔소쿠','하루일과달밥','한울김밥','해피치즈스마일','헤이올리브','현대육','호미스피자','호호솥밥','홍콩반점','후토루'];
+var RCOLORS=['#534AB7','#1D9E75','#D85A30','#185FA5','#D4537E','#639922','#BA7517','#A32D2D','#3C3489','#0F6E56','#993C1D','#0C447C','#993556','#3B6D11','#854F0B','#4f6ef7','#e53935','#ff7043'];
+var rSelected=[],rAngle=0,rSpinning=false,rRaf=null,rConfettiArr=[],rConfRaf=null,rConfActive=false;
+
+function rInitStoreList(){
+  document.getElementById('r-search').oninput=rFilterStores;
+  rRenderStoreList(ROULETTE_STORES);
+}
+function rFilterStores(){
+  var q=document.getElementById('r-search').value.trim().toLowerCase();
+  rRenderStoreList(q?ROULETTE_STORES.filter(function(s){return s.toLowerCase().includes(q);}):ROULETTE_STORES);
+}
+function rRenderStoreList(list){
+  document.getElementById('r-store-list').innerHTML=list.map(function(s){
+    var added=rSelected.includes(s);
+    return '<button class="r-store-btn'+(added?' r-added':'')+'" onclick="rToggleStore(\''+s+'\')">'+s+(added?' ✓':'')+'</button>';
+  }).join('');
+}
+function rToggleStore(s){
+  if(rSelected.includes(s))rSelected=rSelected.filter(function(x){return x!==s;});
+  else rSelected.push(s);
+  rUpdate();rFilterStores();
+}
+function rUpdate(){
+  var n=rSelected.length;
+  document.getElementById('r-cnt').textContent=n;
+  document.getElementById('r-spin-btn').disabled=n<2||rSpinning;
+  var slots=document.getElementById('r-slots');
+  if(!n){slots.innerHTML='<span style="font-size:13px;color:#bbb">← 가게를 추가하세요</span>';rDrawWheel();return;}
+  slots.innerHTML=rSelected.map(function(s){return '<span class="r-chip">'+s+'<button class="r-chip-rm" onclick="rToggleStore(\''+s+'\')">×</button></span>';}).join('');
+  rDrawWheel();
+}
+function rDrawWheel(){
+  var cv=document.getElementById('r-wheel'),ctx=cv.getContext('2d'),n=rSelected.length;
+  ctx.clearRect(0,0,600,600);
+  if(!n){
+    ctx.beginPath();ctx.arc(300,300,280,0,2*Math.PI);
+    ctx.fillStyle='#f0f4ff';ctx.fill();
+    ctx.fillStyle='#aaa';ctx.font='bold 18px Segoe UI,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('가게를 2개 이상 추가하세요',300,300);
+    return;
+  }
+  var arc=2*Math.PI/n;
+  for(var i=0;i<n;i++){
+    var a0=rAngle+arc*i,a1=a0+arc;
+    // 조각
+    ctx.beginPath();ctx.moveTo(300,300);ctx.arc(300,300,280,a0,a1);ctx.closePath();
+    ctx.fillStyle=RCOLORS[i%RCOLORS.length];ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;ctx.stroke();
+    // 텍스트
+    ctx.save();ctx.translate(300,300);ctx.rotate(a0+arc/2);
+    var txt=rSelected[i];
+    var fs=Math.min(16,Math.max(10,15-Math.floor(txt.length/4)));
+    ctx.font='600 '+fs+'px Segoe UI,sans-serif';
+    ctx.fillStyle='#fff';ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=4;
+    var disp=txt.length>9?txt.slice(0,8)+'…':txt;
+    ctx.fillText(disp,262,0);
+    ctx.restore();
+  }
+  // 외곽 링
+  ctx.beginPath();ctx.arc(300,300,280,0,2*Math.PI);
+  ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=4;ctx.stroke();
+  // 중심 원
+  ctx.beginPath();ctx.arc(300,300,34,0,2*Math.PI);
+  var cg=ctx.createRadialGradient(300,300,0,300,300,34);
+  cg.addColorStop(0,'#fff');cg.addColorStop(1,'#e8edff');
+  ctx.fillStyle=cg;ctx.shadowColor='rgba(0,0,0,.2)';ctx.shadowBlur=10;ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.font='bold 14px Segoe UI,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillStyle='#4f6ef7';ctx.fillText('GO!',300,300);
+}
+function rSpin(){
+  if(rSpinning||rSelected.length<2)return;
+  rSpinning=true;
+  document.getElementById('r-spin-btn').disabled=true;
+  document.getElementById('r-spin-btn').textContent='🎡 돌아가는 중...';
+  var extra=2*Math.PI*(6+Math.random()*10);
+  var dur=4500+Math.random()*2000;
+  var startAngle=rAngle,start=performance.now();
+  function ease(t){return t<1?1-Math.pow(1-t,4):1;}
+  function frame(now){
+    var t=Math.min((now-start)/dur,1);
+    rAngle=startAngle+extra*ease(t);
+    rDrawWheel();
+    if(t<1)rRaf=requestAnimationFrame(frame);
+    else{rAngle=rAngle%(2*Math.PI);rDrawWheel();rFinish();}
+  }
+  rRaf=requestAnimationFrame(frame);
+}
+function rFinish(){
+  rSpinning=false;
+  document.getElementById('r-spin-btn').textContent='🎡 돌리기!';
+  document.getElementById('r-spin-btn').disabled=false;
+  var n=rSelected.length,arc=2*Math.PI/n;
+  // 포인터는 위쪽(3π/2) 방향 → 정규화
+  var norm=((-rAngle%(2*Math.PI))+(2*Math.PI))%(2*Math.PI);
+  // 캔버스 시작각도 보정: arc 시작이 3시(0)이므로 포인터 위치(12시=3π/2) 기준
+  var adjusted=(norm+Math.PI/2)%(2*Math.PI);
+  var idx=Math.floor(adjusted/arc)%n;
+  var winner=rSelected[idx];
+  setTimeout(function(){rShowResult(winner);},400);
+}
+function rShowResult(name){
+  document.getElementById('r-res-name').textContent=name;
+  document.getElementById('r-overlay').style.display='flex';
+  rLaunchConfetti();
+}
+function rCloseResult(){
+  document.getElementById('r-overlay').style.display='none';
+  rStopConfetti();
+}
+
+// 폭죽
+var rConfColors=['#534AB7','#1D9E75','#D85A30','#e24b4a','#185FA5','#D4537E','#EF9F27','#fff','#4f6ef7','#ff7043','#FFD700'];
+function rMakeParticle(){
+  return{
+    x:Math.random()*window.innerWidth,y:-20-Math.random()*300,
+    vx:(Math.random()-0.5)*10,vy:2+Math.random()*8,
+    rot:Math.random()*360,rotV:(Math.random()-0.5)*12,
+    w:6+Math.random()*12,h:4+Math.random()*6,
+    c:rConfColors[Math.floor(Math.random()*rConfColors.length)],
+    alpha:1,shape:Math.random()>0.5?'rect':'circle'
+  };
+}
+function rLaunchConfetti(){
+  var cv=document.getElementById('r-confetti');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  rConfActive=true;rConfettiArr=[];
+  for(var i=0;i<220;i++)rConfettiArr.push(rMakeParticle());
+  if(rConfRaf)cancelAnimationFrame(rConfRaf);
+  rAnimConf();
+  setTimeout(rStopConfetti,5000);
+}
+function rAnimConf(){
+  if(!rConfActive)return;
+  var cv=document.getElementById('r-confetti'),ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  rConfettiArr.forEach(function(p){
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.rot+=p.rotV;
+    if(p.y>cv.height-50)p.alpha=Math.max(0,p.alpha-0.03);
+    ctx.save();ctx.globalAlpha=p.alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);
+    ctx.fillStyle=p.c;
+    if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.w/2,0,2*Math.PI);ctx.fill();}
+    else ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    ctx.restore();
+  });
+  rConfettiArr=rConfettiArr.filter(function(p){return p.alpha>0;});
+  if(rConfettiArr.length)rConfRaf=requestAnimationFrame(rAnimConf);
+}
+function rStopConfetti(){
+  rConfActive=false;
+  if(rConfRaf)cancelAnimationFrame(rConfRaf);
+  var cv=document.getElementById('r-confetti');
+  cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
+}
+
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function genCode(){return Array.from({length:4},function(){return 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)];}).join('');}
 function getYM(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');}
@@ -472,7 +705,6 @@ document.addEventListener('DOMContentLoaded',function(){
   firebase.initializeApp({apiKey:"AIzaSyBh57wKf-p2i-AobrETwmn5H6Jxi3f4boQ",authDomain:"food-delivery-be16c.firebaseapp.com",databaseURL:"https://food-delivery-be16c-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"food-delivery-be16c",storageBucket:"food-delivery-be16c.firebasestorage.app",messagingSenderId:"1044561065851",appId:"1:1044561065851:web:6997db11d88eaadf72afde"});
   auth=firebase.auth();db=firebase.database();
 
-  // 버튼 바인딩
   document.getElementById('google-login-btn').onclick=function(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e){if(e.code!=='auth/popup-closed-by-user')document.getElementById('l-err').textContent='로그인 오류';});};
   document.getElementById('logout-btn').onclick=function(){stopAll();clearSession();auth.signOut();};
   document.getElementById('create-room-btn').onclick=showCreateModal;
@@ -512,15 +744,12 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('priv-code').oninput=function(){this.value=this.value.toUpperCase();};
   document.getElementById('priv-code').onkeydown=function(e){if(e.key==='Enter')joinPrivate();};
 
-  // 탭
-  document.querySelectorAll('.tab-btn').forEach(function(btn){
-    btn.onclick=function(){switchTab(this.dataset.tab);};
-  });
+  document.querySelectorAll('.tab-btn').forEach(function(btn){btn.onclick=function(){switchTab(this.dataset.tab);};});
 
-  // 메모
   initMemo();
+  rInitStoreList();
+  rDrawWheel();
 
-  // 랭킹 탭
   document.getElementById('rank-tab-amount').classList.add('active');
 
   auth.onAuthStateChanged(async function(user){
@@ -550,12 +779,14 @@ function showRooms(){
 
 function switchTab(tab){
   currentTab=tab;
-  ['public','private','memo'].forEach(function(t){
+  ['public','private','memo','roulette'].forEach(function(t){
     document.getElementById('tab-'+t+'-content').style.display=t===tab?'block':'none';
-    var btn=document.getElementById('tab-'+(t==='public'?'pub':t==='private'?'priv':'memo'));
+    var btnId=t==='public'?'tab-pub':t==='private'?'tab-priv':t==='memo'?'tab-memo':'tab-roulette';
+    var btn=document.getElementById(btnId);
     if(btn){btn.style.background=t===tab?'#4f6ef7':'transparent';btn.style.color=t===tab?'#fff':'#4f6ef7';}
   });
   if(tab==='memo')loadMemos();
+  if(tab==='roulette'){rDrawWheel();}
 }
 
 async function loadPublicRooms(){
@@ -931,7 +1162,6 @@ async function saveManualMenus(){var t=document.getElementById('ai-menu-text-man
 
 // ══════════ 메모판 ══════════
 function initMemo(){
-  // 색깔 선택
   document.getElementById('memo-color-btns').addEventListener('click',function(e){
     var btn=e.target.closest('[data-color]');
     if(!btn)return;
@@ -939,8 +1169,6 @@ function initMemo(){
     document.querySelectorAll('#memo-color-btns [data-color]').forEach(function(b){b.style.border='2px solid transparent';});
     btn.style.border='3px solid #4f6ef7';
   });
-
-  // 메모 저장
   document.getElementById('memo-save-btn').onclick=async function(){
     var content=document.getElementById('memo-content').value.trim();
     if(!content)return alert('내용을 입력해주세요.');
@@ -953,20 +1181,15 @@ function initMemo(){
   };
   document.getElementById('memo-cancel-btn').onclick=function(){document.getElementById('memo-modal').style.display='none';};
   document.getElementById('memo-modal').onclick=function(e){if(e.target===this)this.style.display='none';};
-
-  // 메모판 클릭
   document.getElementById('memo-board').addEventListener('click',function(e){
     if(e.target.closest('.memo-note'))return;
     if(e.target.closest('.epicker'))return;
     var r=this.getBoundingClientRect();
-    memoClickX=e.clientX-r.left;
-    memoClickY=e.clientY-r.top;
+    memoClickX=e.clientX-r.left;memoClickY=e.clientY-r.top;
     document.getElementById('memo-content').value='';
     document.getElementById('memo-modal').style.display='flex';
     setTimeout(function(){document.getElementById('memo-content').focus();},100);
   });
-
-  // 이모지 피커 탭
   document.getElementById('ep-tab-def').onclick=function(){
     this.classList.add('active');document.getElementById('ep-tab-custom').classList.remove('active');
     document.getElementById('ep-grid-def').style.display='grid';document.getElementById('ep-custom').style.display='none';
@@ -976,21 +1199,10 @@ function initMemo(){
     document.getElementById('ep-grid-def').style.display='none';document.getElementById('ep-custom').style.display='block';
     loadCustomEmojis();
   };
-
-  // 기본 이모지 그리드
-  document.getElementById('ep-grid-def').innerHTML=DEFAULT_EMOJIS.map(function(em){
-    return '<button class="epicker-btn" data-emoji="'+em+'">'+em+'</button>';
-  }).join('');
-  document.getElementById('ep-grid-def').addEventListener('click',function(e){
-    var btn=e.target.closest('.epicker-btn');
-    if(btn)doAddReaction(btn.dataset.emoji);
-  });
-
-  // 커스텀 업로드
+  document.getElementById('ep-grid-def').innerHTML=DEFAULT_EMOJIS.map(function(em){return '<button class="epicker-btn" data-emoji="'+em+'">'+em+'</button>';}).join('');
+  document.getElementById('ep-grid-def').addEventListener('click',function(e){var btn=e.target.closest('.epicker-btn');if(btn)doAddReaction(btn.dataset.emoji);});
   document.getElementById('ep-upload-area').onclick=function(){document.getElementById('ep-file').click();};
   document.getElementById('ep-file').onchange=function(){uploadCustomEmoji(this);};
-
-  // 피커 외부 클릭 닫기
   document.addEventListener('click',function(e){
     var picker=document.getElementById('epicker');
     if(!picker||picker.style.display==='none')return;
@@ -1005,8 +1217,7 @@ async function loadCustomEmojis(){
   grid.innerHTML='';
   Object.entries(snap.val()).forEach(function(e){
     var btn=document.createElement('button');
-    btn.className='epicker-btn';
-    btn.dataset.cname=e[0];
+    btn.className='epicker-btn';btn.dataset.cname=e[0];
     btn.innerHTML='<img src="'+e[1].url+'" style="width:22px;height:22px;object-fit:contain">';
     btn.onclick=function(){doAddReaction(':'+e[0]+':');};
     grid.appendChild(btn);
@@ -1022,23 +1233,17 @@ async function uploadCustomEmoji(input){
     await db.ref('customEmojis/'+name).set({url:e.target.result,uploadedBy:myName,ts:Date.now()});
     loadCustomEmojis();alert(':'+name+': 추가됐어요!');
   };
-  reader.readAsDataURL(file);
-  input.value='';
+  reader.readAsDataURL(file);input.value='';
 }
 
 function openEpicker(memoKey,btnEl){
   curEmojiKey=memoKey;
-  var picker=document.getElementById('epicker');
-  picker.style.display='block';
+  var picker=document.getElementById('epicker');picker.style.display='block';
   var board=document.getElementById('memo-board');
-  var br=board.getBoundingClientRect();
-  var btnR=btnEl.getBoundingClientRect();
-  var left=btnR.left-br.left-265;
-  var top=btnR.top-br.top-220;
-  if(left<4)left=btnR.right-br.left+4;
-  if(top<30)top=btnR.bottom-br.top+4;
-  picker.style.left=Math.max(4,Math.min(left,br.width-270))+'px';
-  picker.style.top=Math.max(30,top)+'px';
+  var br=board.getBoundingClientRect(),btnR=btnEl.getBoundingClientRect();
+  var left=btnR.left-br.left-265,top=btnR.top-br.top-220;
+  if(left<4)left=btnR.right-br.left+4;if(top<30)top=btnR.bottom-br.top+4;
+  picker.style.left=Math.max(4,Math.min(left,br.width-270))+'px';picker.style.top=Math.max(30,top)+'px';
 }
 
 async function doAddReaction(emoji){
@@ -1052,20 +1257,16 @@ async function doAddReaction(emoji){
   else await db.ref(path).set(myName);
 }
 
-var memoLis=null;
 function loadMemos(){
   if(memoLis){try{db.ref('memos').off('value',memoLis);}catch(e){} memoLis=null;}
   var container=document.getElementById('memo-items');
   memoLis=db.ref('memos').on('value',function(snap){
     container.innerHTML='';
     if(!snap.exists())return;
-    var board=document.getElementById('memo-board');
-    var bh=600;
+    var board=document.getElementById('memo-board'),bh=600;
     Object.entries(snap.val()).forEach(function(entry){
       var k=entry[0],m=entry[1];
       if((m.y||0)+200>bh)bh=(m.y||0)+220;
-
-      // 반응 HTML
       var rhtml='';
       if(m.reactions){
         Object.entries(m.reactions).forEach(function(re){
@@ -1074,101 +1275,34 @@ function loadMemos(){
           var cnt=Object.keys(users).length;if(!cnt)return;
           var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
           var isMine=!!users[uid];
-          // 이모지 복원
           var emoji=safeKey.replace(/_x([0-9a-f]+)_/g,function(_,h){try{return String.fromCodePoint(parseInt(h,16));}catch(e){return '';}});
           var isCustom=safeKey.startsWith(':')&&safeKey.endsWith(':');
           var display=isCustom?'<img data-cn="'+esc(safeKey.slice(1,-1))+'" style="width:14px;height:14px;vertical-align:middle">':emoji;
           rhtml+='<span class="reaction-chip'+(isMine?' mine':'')+'" data-rkey="'+esc(safeKey)+'">'+display+' '+cnt+'</span>';
         });
       }
-
       var div=document.createElement('div');
       div.className='memo-note';
-      div.style.left=(m.x||0)+'px';
-      div.style.top=(m.y||30)+'px';
-      div.style.background=m.color||'#fef9c3';
-      div.style.position='absolute';
-      div.innerHTML=
-        '<button class="memo-del">✕</button>'
-        +'<div class="memo-author">📌 '+esc(m.author)+'</div>'
-        +'<div style="font-size:13px;line-height:1.5;word-break:break-all;white-space:pre-wrap">'+esc(m.content)+'</div>'
-        +'<div class="memo-reactions">'+rhtml+'<button class="reaction-add">+</button></div>';
-
-      // 커스텀 이모지 이미지 로드
-      div.querySelectorAll('img[data-cn]').forEach(async function(img){
-        var s=await db.ref('customEmojis/'+img.dataset.cn).get();
-        if(s.exists())img.src=s.val().url;
-      });
-
-      // 반응 클릭
-      div.querySelectorAll('.reaction-chip').forEach(function(chip){
-        chip.onclick=function(e){e.stopPropagation();curEmojiKey=k;doAddReaction(this.dataset.rkey);};
-      });
-
-      // + 버튼
-      div.querySelector('.reaction-add').onclick=function(e){
-        e.stopPropagation();
-        openEpicker(k,this);
-      };
-
-      // 삭제
-      div.querySelector('.memo-del').onclick=function(e){
-        e.stopPropagation();
-        if(m.uid===cu.uid||window.confirm('삭제하시겠습니까?'))db.ref('memos/'+k).remove();
-      };
-
-      // ── 드래그 이동 ──
+      div.style.left=(m.x||0)+'px';div.style.top=(m.y||30)+'px';div.style.background=m.color||'#fef9c3';div.style.position='absolute';
+      div.innerHTML='<button class="memo-del">✕</button><div class="memo-author">📌 '+esc(m.author)+'</div><div style="font-size:13px;line-height:1.5;word-break:break-all;white-space:pre-wrap">'+esc(m.content)+'</div><div class="memo-reactions">'+rhtml+'<button class="reaction-add">+</button></div>';
+      div.querySelectorAll('img[data-cn]').forEach(async function(img){var s=await db.ref('customEmojis/'+img.dataset.cn).get();if(s.exists())img.src=s.val().url;});
+      div.querySelectorAll('.reaction-chip').forEach(function(chip){chip.onclick=function(e){e.stopPropagation();curEmojiKey=k;doAddReaction(this.dataset.rkey);};});
+      div.querySelector('.reaction-add').onclick=function(e){e.stopPropagation();openEpicker(k,this);};
+      div.querySelector('.memo-del').onclick=function(e){e.stopPropagation();if(m.uid===cu.uid||window.confirm('삭제하시겠습니까?'))db.ref('memos/'+k).remove();};
       var drag=false,ox=0,oy=0,moved=false;
-
       div.addEventListener('mousedown',function(e){
         if(e.target.classList.contains('memo-del')||e.target.classList.contains('reaction-add')||e.target.classList.contains('reaction-chip'))return;
-        e.preventDefault();e.stopPropagation();
-        drag=true;moved=false;
-        var r=div.getBoundingClientRect();
-        ox=e.clientX-r.left;oy=e.clientY-r.top;
+        e.preventDefault();e.stopPropagation();drag=true;moved=false;
+        var r=div.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;
         div.style.cursor='grabbing';div.style.zIndex='500';
       });
-
-      function onMouseMove(e){
-        if(!drag)return;moved=true;
-        var br=board.getBoundingClientRect();
-        var nx=e.clientX-br.left-ox;
-        var ny=e.clientY-br.top-oy;
-        nx=Math.max(0,Math.min(nx,br.width-170));
-        ny=Math.max(30,ny);
-        div.style.left=nx+'px';div.style.top=ny+'px';
-      }
-      function onMouseUp(){
-        if(!drag)return;drag=false;
-        div.style.cursor='grab';div.style.zIndex='';
-        if(moved)db.ref('memos/'+k).update({x:parseFloat(div.style.left),y:parseFloat(div.style.top)});
-      }
-      document.addEventListener('mousemove',onMouseMove);
-      document.addEventListener('mouseup',onMouseUp);
-
-      // 터치
-      div.addEventListener('touchstart',function(e){
-        if(e.target.classList.contains('memo-del')||e.target.classList.contains('reaction-add'))return;
-        drag=true;moved=false;
-        var r=div.getBoundingClientRect();
-        ox=e.touches[0].clientX-r.left;oy=e.touches[0].clientY-r.top;
-        div.style.zIndex='500';
-      },{passive:true});
-      div.addEventListener('touchmove',function(e){
-        if(!drag)return;moved=true;e.preventDefault();
-        var br=board.getBoundingClientRect();
-        var nx=e.touches[0].clientX-br.left-ox;
-        var ny=e.touches[0].clientY-br.top-oy;
-        nx=Math.max(0,Math.min(nx,br.width-170));ny=Math.max(30,ny);
-        div.style.left=nx+'px';div.style.top=ny+'px';
-      },{passive:false});
-      div.addEventListener('touchend',function(){
-        if(!drag)return;drag=false;div.style.zIndex='';
-        if(moved)db.ref('memos/'+k).update({x:parseFloat(div.style.left),y:parseFloat(div.style.top)});
-      });
-
-      container.appendChild(div);
-      board.style.minHeight=bh+'px';
+      function onMM(e){if(!drag)return;moved=true;var br=board.getBoundingClientRect();var nx=e.clientX-br.left-ox,ny=e.clientY-br.top-oy;nx=Math.max(0,Math.min(nx,br.width-170));ny=Math.max(30,ny);div.style.left=nx+'px';div.style.top=ny+'px';}
+      function onMU(){if(!drag)return;drag=false;div.style.cursor='grab';div.style.zIndex='';if(moved)db.ref('memos/'+k).update({x:parseFloat(div.style.left),y:parseFloat(div.style.top)});}
+      document.addEventListener('mousemove',onMM);document.addEventListener('mouseup',onMU);
+      div.addEventListener('touchstart',function(e){if(e.target.classList.contains('memo-del')||e.target.classList.contains('reaction-add'))return;drag=true;moved=false;var r=div.getBoundingClientRect();ox=e.touches[0].clientX-r.left;oy=e.touches[0].clientY-r.top;div.style.zIndex='500';},{passive:true});
+      div.addEventListener('touchmove',function(e){if(!drag)return;moved=true;e.preventDefault();var br=board.getBoundingClientRect();var nx=e.touches[0].clientX-br.left-ox,ny=e.touches[0].clientY-br.top-oy;nx=Math.max(0,Math.min(nx,br.width-170));ny=Math.max(30,ny);div.style.left=nx+'px';div.style.top=ny+'px';},{passive:false});
+      div.addEventListener('touchend',function(){if(!drag)return;drag=false;div.style.zIndex='';if(moved)db.ref('memos/'+k).update({x:parseFloat(div.style.left),y:parseFloat(div.style.top)});});
+      container.appendChild(div);board.style.minHeight=bh+'px';
     });
   });
 }
