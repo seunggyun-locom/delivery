@@ -889,11 +889,12 @@ async function renderChat(chatObj){
       });
     }
     return '<div class="chat-msg-wrap '+(isMe?'me':'other')+'">'
-      +'<div style="display:flex;align-items:flex-end;gap:6px;'+(isMe?'flex-direction:row-reverse':'')+'">'
+      +'<div style="display:flex;align-items:flex-end;gap:6px;">'
+      +(isMe?'<button class="chat-add-reaction" data-msgkey="'+key+'">😊</button>':'')
       +'<div class="chat-msg '+(isMe?'me':'other')+'"><div class="chat-sender">'+esc(m.name)+'</div><div>'+esc(m.msg)+'</div></div>'
-      +'<button class="chat-add-reaction" data-msgkey="'+key+'">😊</button>'
+      +(!isMe?'<button class="chat-add-reaction" data-msgkey="'+key+'">😊</button>':'')
       +'</div>'
-      +(reactHtml?'<div class="chat-reactions">'+reactHtml+'</div>':'')
+      +(reactHtml?'<div class="chat-reactions" style="'+(isMe?'justify-content:flex-end':'')+'">'+reactHtml+'</div>':'')
       +'</div>';
   }).join('');
 
