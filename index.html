@@ -112,9 +112,11 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 .chat-reaction-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;background:rgba(0,0,0,.07);font-size:13px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;user-select:none;position:relative}
 .chat-reaction-chip.mine{border-color:#4f6ef7;background:rgba(79,110,247,.13)}
 .chat-reaction-chip:hover{background:rgba(79,110,247,.1);border-color:#4f6ef7}
-.react-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:12px;border-radius:8px;padding:6px 10px;white-space:nowrap;pointer-events:none;z-index:9999;line-height:1.6;max-width:200px;white-space:normal;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.react-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:12px;border-radius:8px;padding:6px 10px;white-space:nowrap;pointer-events:none;z-index:9999;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.25)}
 .react-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a1a2e}
 .chat-reaction-chip:hover .react-tooltip{display:block}
+.reaction-chip{position:relative}
+.reaction-chip:hover .react-tooltip{display:block}
 .chat-add-reaction{opacity:0;transition:opacity .2s;background:none;border:1.5px dashed #ccc;border-radius:20px;padding:2px 7px;font-size:13px;cursor:pointer;color:#aaa}
 .chat-add-reaction:hover{border-color:#4f6ef7;color:#4f6ef7;opacity:1!important}
 .chat-msg-wrap:hover .chat-add-reaction{opacity:1}
@@ -533,7 +535,12 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
     </div>
     <!-- 채팅 이모지 피커 -->
     <div class="chat-emoji-picker" id="chat-emoji-picker">
+      <div style="display:flex;gap:4px;margin-bottom:8px">
+        <button id="cep-tab-def" style="flex:1;padding:4px 8px;border:none;border-radius:8px;background:#4f6ef7;color:#fff;font-size:12px;font-weight:600;cursor:pointer">기본</button>
+        <button id="cep-tab-custom" style="flex:1;padding:4px 8px;border:none;border-radius:8px;background:transparent;color:#4f6ef7;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #dde1f0">커스텀</button>
+      </div>
       <div class="chat-emoji-grid" id="chat-emoji-grid"></div>
+      <div id="cep-custom-grid" style="display:none;grid-template-columns:repeat(7,1fr);gap:3px;max-height:150px;overflow-y:auto"></div>
     </div>
   </div>
 </div>
@@ -1098,10 +1105,10 @@ function renderChat(chatObj){
         var cnt=userEntries.length;if(!cnt)return;
         var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
         var isMine=!!users[uid];
-        var tooltipLines=userEntries.map(function(name){return esc(name)+'님이 '+emoji+'로 반응했습니다';}).join('<br>');
+        var tooltipText=userEntries.join(', ')+'님이 '+emoji+'로 반응했습니다';
         reactHtml+='<span class="chat-reaction-chip'+(isMine?' mine':'')+'" data-msgkey="'+key+'" data-emoji="'+esc(emoji)+'">'
           +emoji+' '+cnt
-          +'<span class="react-tooltip">'+tooltipLines+'</span>'
+          +'<span class="react-tooltip">'+esc(tooltipText)+'</span>'
           +'</span>';
       });
     }
@@ -1135,24 +1142,49 @@ function renderChat(chatObj){
 function openChatEmojiPicker(msgKey,btnEl){
   curChatMsgKey=msgKey;
   var picker=document.getElementById('chat-emoji-picker');
-  // 그리드 초기화
-  document.getElementById('chat-emoji-grid').innerHTML=CHAT_EMOJIS.map(function(em){
+  // 기본 탭 초기화
+  var defGrid=document.getElementById('chat-emoji-grid');
+  var cusGrid=document.getElementById('cep-custom-grid');
+  defGrid.style.display='grid'; cusGrid.style.display='none';
+  document.getElementById('cep-tab-def').style.background='#4f6ef7';
+  document.getElementById('cep-tab-def').style.color='#fff';
+  document.getElementById('cep-tab-custom').style.background='transparent';
+  document.getElementById('cep-tab-custom').style.color='#4f6ef7';
+  defGrid.innerHTML=CHAT_EMOJIS.map(function(em){
     return '<button class="chat-emoji-btn" data-emoji="'+em+'">'+em+'</button>';
   }).join('');
-  document.getElementById('chat-emoji-grid').querySelectorAll('.chat-emoji-btn').forEach(function(b){
-    b.onclick=function(){
-      toggleChatReaction(curChatMsgKey,this.dataset.emoji);
-      picker.style.display='none';
-    };
+  defGrid.querySelectorAll('.chat-emoji-btn').forEach(function(b){
+    b.onclick=function(){toggleChatReaction(curChatMsgKey,this.dataset.emoji);picker.style.display='none';};
   });
+  // 탭 전환
+  document.getElementById('cep-tab-def').onclick=function(){
+    defGrid.style.display='grid';cusGrid.style.display='none';
+    this.style.background='#4f6ef7';this.style.color='#fff';
+    document.getElementById('cep-tab-custom').style.background='transparent';document.getElementById('cep-tab-custom').style.color='#4f6ef7';
+  };
+  document.getElementById('cep-tab-custom').onclick=async function(){
+    defGrid.style.display='none';cusGrid.style.display='grid';
+    this.style.background='#4f6ef7';this.style.color='#fff';
+    document.getElementById('cep-tab-def').style.background='transparent';document.getElementById('cep-tab-def').style.color='#4f6ef7';
+    // 커스텀 이모지 로드
+    var snap=await db.ref('customEmojis').get();
+    cusGrid.innerHTML='';
+    if(!snap.exists()){cusGrid.innerHTML='<div style="color:#aaa;font-size:11px;padding:8px;grid-column:span 7">메모판에서 먼저 추가하세요</div>';return;}
+    Object.entries(snap.val()).forEach(function(e){
+      var btn=document.createElement('button');
+      btn.className='chat-emoji-btn';
+      btn.innerHTML='<img src="'+e[1].url+'" style="width:22px;height:22px;object-fit:contain">';
+      btn.onclick=function(){toggleChatReaction(curChatMsgKey,':'+e[0]+':');picker.style.display='none';};
+      cusGrid.appendChild(btn);
+    });
+  };
   picker.style.display='block';
   var r=btnEl.getBoundingClientRect();
-  var top=r.top+window.scrollY-160;
+  var top=r.top+window.scrollY-180;
   var left=r.left+window.scrollX-100;
   if(top<60)top=r.bottom+window.scrollY+4;
   left=Math.max(8,Math.min(left,window.innerWidth-260));
-  picker.style.top=top+'px';
-  picker.style.left=left+'px';
+  picker.style.top=top+'px';picker.style.left=left+'px';
 }
 
 async function toggleChatReaction(msgKey,emoji){
@@ -1382,7 +1414,9 @@ function loadMemos(){
           var emoji=safeKey.replace(/_x([0-9a-f]+)_/g,function(_,h){try{return String.fromCodePoint(parseInt(h,16));}catch(e){return '';}});
           var isCustom=safeKey.startsWith(':')&&safeKey.endsWith(':');
           var display=isCustom?'<img data-cn="'+esc(safeKey.slice(1,-1))+'" style="width:14px;height:14px;vertical-align:middle">':emoji;
-          rhtml+='<span class="reaction-chip'+(isMine?' mine':'')+'" data-rkey="'+esc(safeKey)+'">'+display+' '+cnt+'</span>';
+          var userNames=Object.values(users);
+          var tooltipText=esc(userNames.join(', ')+'님이 '+(isCustom?safeKey:emoji)+'로 반응했습니다');
+          rhtml+='<span class="reaction-chip'+(isMine?' mine':'')+'" data-rkey="'+esc(safeKey)+'">'+display+' '+cnt+'<span class="react-tooltip">'+tooltipText+'</span></span>';
         });
       }
       var div=document.createElement('div');
