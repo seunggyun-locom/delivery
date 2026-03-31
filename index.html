@@ -929,6 +929,8 @@ function renderOrders(orders,room){
 }
 
 function onDoneClick(){
+  var btn=document.getElementById('done-btn');
+  if(btn.disabled)return;
   var result=window.confirm('배달이 완료되었습니까?\n완료하면 랭킹에 등록되고 주문이 마감됩니다.');
   if(result===true) completeDelivery();
 }
