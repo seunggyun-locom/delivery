@@ -84,7 +84,7 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 
 /* 랭킹 */
 .ranking-card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 20px rgba(0,0,0,.08);position:sticky;top:20px}
-.rank-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.rank-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f0;overflow:hidden}
 .rank-item:last-child{border-bottom:none}
 .rank-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
 .rank-1{background:#FFD700;color:#7a5f00}
@@ -406,7 +406,7 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
         <button id="open-btn" style="flex:1;padding:12px;border:none;border-radius:10px;background:#28a745;color:#fff;font-weight:600;cursor:pointer;min-width:120px">✅ 주문 오픈</button>
         <button id="close-btn" style="flex:1;padding:12px;border:none;border-radius:10px;background:#ff4d4d;color:#fff;font-weight:600;cursor:pointer;min-width:120px">🔒 주문 마감</button>
       </div>
-      <button id="done-btn" style="width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#28a745,#20c997);color:#fff;font-weight:700;cursor:pointer;font-size:16px;letter-spacing:.5px">🎉 배달 완료!</button>
+      <button id="done-btn" onclick="if(window.confirm('배달이 완료되었습니까?\n완료하면 랭킹에 등록되고 주문이 마감됩니다.'))completeDelivery();" style="width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#28a745,#20c997);color:#fff;font-weight:700;cursor:pointer;font-size:16px;letter-spacing:.5px">🎉 배달 완료!</button>
     </div>
   </div>
 
