@@ -406,7 +406,7 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
         <button id="open-btn" style="flex:1;padding:12px;border:none;border-radius:10px;background:#28a745;color:#fff;font-weight:600;cursor:pointer;min-width:120px">✅ 주문 오픈</button>
         <button id="close-btn" style="flex:1;padding:12px;border:none;border-radius:10px;background:#ff4d4d;color:#fff;font-weight:600;cursor:pointer;min-width:120px">🔒 주문 마감</button>
       </div>
-      <button id="done-btn" onclick="if(window.confirm('배달이 완료되었습니까?\n완료하면 랭킹에 등록되고 주문이 마감됩니다.'))completeDelivery();" style="width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#28a745,#20c997);color:#fff;font-weight:700;cursor:pointer;font-size:16px;letter-spacing:.5px">🎉 배달 완료!</button>
+      <button id="done-btn" onclick="onDoneClick()" style="width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#28a745,#20c997);color:#fff;font-weight:700;cursor:pointer;font-size:16px;letter-spacing:.5px">🎉 배달 완료!</button>
     </div>
   </div>
 
@@ -926,6 +926,11 @@ function renderOrders(orders,room){
     w.innerHTML+='<div style="margin-top:10px;padding:12px 16px;background:#f0f4ff;border-radius:10px;font-weight:700;color:#4f6ef7;font-size:15px">💰 합계: '+total.toLocaleString()+'원 <span style="font-weight:400;font-size:13px;color:#888">('+priced.length+'/'+orders.length+'명 입력)</span></div>';
   }
   w.innerHTML+='<div style="margin-top:8px;padding:10px 16px;background:'+(paidAll?'#f0fff4':'#fff8e1')+';border-radius:10px;font-size:14px;font-weight:600;color:'+(paidAll?'#28a745':'#f9a825')+'">💳 입금 현황: '+paidCount+'/'+orders.length+'명 완료 '+(paidAll?'✅ 전원 입금 완료!':'')+'</div>';
+}
+
+function onDoneClick(){
+  var result=window.confirm('배달이 완료되었습니까?\n완료하면 랭킹에 등록되고 주문이 마감됩니다.');
+  if(result===true) completeDelivery();
 }
 
 function togglePaid(okey, isPaid){
