@@ -104,6 +104,25 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 .reaction-add{width:22px;height:22px;border-radius:50%;border:1.5px dashed #aaa;background:rgba(255,255,255,.7);cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;color:#888;flex-shrink:0}
 .reaction-add:hover{border-color:#4f6ef7;color:#4f6ef7}
 
+/* 채팅 이모지 반응 */
+.chat-msg-wrap{display:flex;flex-direction:column;margin-bottom:2px}
+.chat-msg-wrap.me{align-items:flex-end}
+.chat-msg-wrap.other{align-items:flex-start}
+.chat-reactions{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;padding:0 4px}
+.chat-reaction-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;background:rgba(0,0,0,.07);font-size:13px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;user-select:none;position:relative}
+.chat-reaction-chip.mine{border-color:#4f6ef7;background:rgba(79,110,247,.13)}
+.chat-reaction-chip:hover{background:rgba(79,110,247,.1);border-color:#4f6ef7}
+.react-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:12px;border-radius:8px;padding:6px 10px;white-space:nowrap;pointer-events:none;z-index:9999;line-height:1.6;max-width:200px;white-space:normal;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.react-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a1a2e}
+.chat-reaction-chip:hover .react-tooltip{display:block}
+.chat-add-reaction{opacity:0;transition:opacity .2s;background:none;border:1.5px dashed #ccc;border-radius:20px;padding:2px 7px;font-size:13px;cursor:pointer;color:#aaa}
+.chat-add-reaction:hover{border-color:#4f6ef7;color:#4f6ef7;opacity:1!important}
+.chat-msg-wrap:hover .chat-add-reaction{opacity:1}
+.chat-emoji-picker{position:fixed;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.22);padding:12px;z-index:9999;width:250px;display:none}
+.chat-emoji-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;max-height:150px;overflow-y:auto}
+.chat-emoji-btn{width:30px;height:30px;border:none;background:transparent;cursor:pointer;border-radius:6px;font-size:17px;display:flex;align-items:center;justify-content:center}
+.chat-emoji-btn:hover{background:#f0f4ff}
+
 /* 이모지 피커 */
 .epicker{position:absolute;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.18);padding:12px;z-index:9000;width:260px}
 .epicker-tabs{display:flex;gap:4px;margin-bottom:8px}
@@ -512,6 +531,10 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
         <button class="chat-send-btn" id="chat-send-btn">전송</button>
       </div>
     </div>
+    <!-- 채팅 이모지 피커 -->
+    <div class="chat-emoji-picker" id="chat-emoji-picker">
+      <div class="chat-emoji-grid" id="chat-emoji-grid"></div>
+    </div>
   </div>
 </div>
 
@@ -527,6 +550,8 @@ var GEMINI_KEY='AIzaSyAT6AZ_sgVxWGz71IYDqL278C7usJq3oDQ';
 var COLOR_MAP={red:{bg:'#fdecea',border:'#e53935',dot:'#e53935',label:'맛없음'},yellow:{bg:'#fffde7',border:'#f9a825',dot:'#f9a825',label:'평범'},green:{bg:'#e8f5e9',border:'#43a047',dot:'#43a047',label:'맛있음'},blue:{bg:'#e3f2fd',border:'#1e88e5',dot:'#1e88e5',label:'~계의 까사논나'}};
 var DEFAULT_EMOJIS=['👍','😂','❤️','🔥','😮','😢','👏','🎉','😍','🤔','😡','🥹','💀','🫡','🤣','😎','🥰','🫶','✅','💯'];
 var curEmojiKey=null,memoClickX=0,memoClickY=0,memoColor='#fef9c3';
+var curChatMsgKey=null;
+var CHAT_EMOJIS=['👍','😂','❤️','🔥','😮','😢','👏','🎉','😍','🤔','😡','🥹','💀','🫡','🤣','😎','🥰','🫶','✅','💯','🍜','🙏','😭','🤩'];
 
 // ══════════ 룰렛 ══════════
 var ROULETTE_STORES=['GTS버거','고돼지','고봉민김밥','교동홀도시락','국수나무','꾸이한끼','담솔','대한냉면','던킨도너츠','롯데리아','마녀김밥','마시어때','마왕족발','맘스터치','맥도날드','문막집','바스버거','백나예김밥','백소정','버거킹','버텍스','본도시락','본죽','봉구스밥버거','상아김밥','샐러디','샐러드박스','서브웨이','슬로우캘리','스쿨푸드','싸움의고수','쌍팔반점','숯불고기냉면','수타우동젠','암샘김밥','영심이떡볶이김밥','오니기리와이규동','오레노카츠','오토김밥','올라포케','올레샐러드','올리아테이블','우리할매떡볶이','이삭토스트','인생냉면','잭슨피자','진된장','진부엉이꼬마김밥','죽도령','처갓집양념치킨','청년홍국수','칠리로29','KFC','킹콩부대찌개','퀴즈노스','탄탄면공방','판미각','파스타예요','플램잭트리','하루엔소쿠','하루일과달밥','한울김밥','해피치즈스마일','헤이올리브','현대육','호미스피자','호호솥밥','홍콩반점','후토루'];
@@ -1056,13 +1081,93 @@ function renderSavedMenus(text){
 
 function renderChat(chatObj){
   var msgs=chatObj?Object.entries(chatObj).sort(function(a,b){return a[1].ts-b[1].ts;}):[];
-  if(msgs.length===lastChatLen)return;
-  lastChatLen=msgs.length;
+  var newHash=JSON.stringify(msgs.map(function(e){return [e[0],e[1].msg,e[1].reactions];}));
+  if(newHash===lastChatLen)return;
+  lastChatLen=newHash;
   var el=document.getElementById('chat-messages');
   var atBot=el.scrollHeight-el.scrollTop-el.clientHeight<80;
-  el.innerHTML=msgs.map(function(m){var isMe=m[1].name===myName;return '<div class="chat-msg '+(isMe?'me':'other')+'"><div class="chat-sender">'+esc(m[1].name)+'</div><div>'+esc(m[1].msg)+'</div></div>';}).join('');
+  el.innerHTML=msgs.map(function(entry){
+    var key=entry[0],m=entry[1];
+    var isMe=m.name===myName;
+    var reactHtml='';
+    if(m.reactions){
+      Object.entries(m.reactions).forEach(function(re){
+        var emoji=re[0],users=re[1];
+        if(!users)return;
+        var userEntries=Object.values(users);
+        var cnt=userEntries.length;if(!cnt)return;
+        var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
+        var isMine=!!users[uid];
+        var tooltipLines=userEntries.map(function(name){return esc(name)+'님이 '+emoji+'로 반응했습니다';}).join('<br>');
+        reactHtml+='<span class="chat-reaction-chip'+(isMine?' mine':'')+'" data-msgkey="'+key+'" data-emoji="'+esc(emoji)+'">'
+          +emoji+' '+cnt
+          +'<span class="react-tooltip">'+tooltipLines+'</span>'
+          +'</span>';
+      });
+    }
+    return '<div class="chat-msg-wrap '+(isMe?'me':'other')+'" data-msgkey="'+key+'">'
+      +'<div style="display:flex;align-items:flex-end;gap:6px;'+(isMe?'flex-direction:row-reverse':'')+'">'
+      +'<div class="chat-msg '+(isMe?'me':'other')+'"><div class="chat-sender">'+esc(m.name)+'</div><div>'+esc(m.msg)+'</div></div>'
+      +'<button class="chat-add-reaction" data-msgkey="'+key+'" title="반응 추가">😊</button>'
+      +'</div>'
+      +(reactHtml?'<div class="chat-reactions">'+reactHtml+'</div>':'')
+      +'</div>';
+  }).join('');
+
+  // 반응 클릭
+  el.querySelectorAll('.chat-reaction-chip').forEach(function(chip){
+    chip.onclick=function(e){
+      e.stopPropagation();
+      toggleChatReaction(this.dataset.msgkey,this.dataset.emoji);
+    };
+  });
+  // + 버튼 클릭
+  el.querySelectorAll('.chat-add-reaction').forEach(function(btn){
+    btn.onclick=function(e){
+      e.stopPropagation();
+      openChatEmojiPicker(this.dataset.msgkey,this);
+    };
+  });
+
   if(atBot)el.scrollTop=el.scrollHeight;
 }
+
+function openChatEmojiPicker(msgKey,btnEl){
+  curChatMsgKey=msgKey;
+  var picker=document.getElementById('chat-emoji-picker');
+  // 그리드 초기화
+  document.getElementById('chat-emoji-grid').innerHTML=CHAT_EMOJIS.map(function(em){
+    return '<button class="chat-emoji-btn" data-emoji="'+em+'">'+em+'</button>';
+  }).join('');
+  document.getElementById('chat-emoji-grid').querySelectorAll('.chat-emoji-btn').forEach(function(b){
+    b.onclick=function(){
+      toggleChatReaction(curChatMsgKey,this.dataset.emoji);
+      picker.style.display='none';
+    };
+  });
+  picker.style.display='block';
+  var r=btnEl.getBoundingClientRect();
+  var top=r.top+window.scrollY-160;
+  var left=r.left+window.scrollX-100;
+  if(top<60)top=r.bottom+window.scrollY+4;
+  left=Math.max(8,Math.min(left,window.innerWidth-260));
+  picker.style.top=top+'px';
+  picker.style.left=left+'px';
+}
+
+async function toggleChatReaction(msgKey,emoji){
+  var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
+  var path='rooms/'+myCode+'/chat/'+msgKey+'/reactions/'+emoji+'/'+uid;
+  var snap=await db.ref(path).get();
+  if(snap.exists())await db.ref(path).remove();
+  else await db.ref(path).set(myName);
+}
+
+// 채팅 피커 외부 클릭 닫기
+document.addEventListener('click',function(e){
+  var picker=document.getElementById('chat-emoji-picker');
+  if(picker&&picker.style.display!=='none'&&!picker.contains(e.target))picker.style.display='none';
+});
 
 function renderHostImages(imgs){
   var grid=document.getElementById('h-img-grid');
