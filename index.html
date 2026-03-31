@@ -848,8 +848,12 @@ function renderRoom(room){
     document.getElementById('close-btn').style.display='none';
   } else {
     doneBtn.style.display='block';
-    doneBtn.disabled=false;
-    doneBtn.textContent='🎉 배달 완료!';
+    var allOrders=room.orders?Object.values(room.orders).filter(function(o){return !o.canceled;}):[];
+    var allPaid=allOrders.length>0&&allOrders.every(function(o){return o.paid===true;});
+    doneBtn.disabled=!allPaid;
+    doneBtn.style.opacity=allPaid?'1':'0.4';
+    doneBtn.style.cursor=allPaid?'pointer':'not-allowed';
+    doneBtn.textContent=allPaid?'🎉 배달 완료!':'🔒 전원 입금 후 완료 가능';
     document.getElementById('open-btn').style.display='';
     document.getElementById('close-btn').style.display='';
   }
@@ -902,18 +906,30 @@ function renderOrders(orders,room){
   w.innerHTML=orders.map(function(o){
     var isMe=o.name===myName;
     var oKey=orderKeys[o.name]||'';
+    var isPaid=o.paid===true;
+    var canPay=isMe||myRole==='host';
     var priceHtml=o.price!=null
       ?'<div style="font-size:13px;color:#4f6ef7;font-weight:700;margin-top:4px">💰 '+Number(o.price).toLocaleString()+'원</div>'
       :myRole==='host'
         ?'<div style="display:flex;align-items:center;gap:8px;margin-top:6px"><input type="number" id="pi-'+oKey+'" placeholder="가격 입력" min="0" style="width:120px;padding:6px 10px;font-size:13px;border:1.5px solid #dde1f0;border-radius:8px"><button onclick="savePriceByKey(\''+oKey+'\')" style="padding:6px 12px;border:none;border-radius:8px;background:#4f6ef7;color:#fff;font-size:12px;font-weight:600;cursor:pointer">저장</button></div>'
         :'<div style="font-size:12px;color:#aaa;margin-top:4px">가격 미입력</div>';
-    return '<div class="order-item" style="'+(isMe?'border-color:#4f6ef7;':'')+'"><div class="order-name">'+(isMe?'⭐':'🙋')+' '+esc(o.name)+(isMe?' <span style="font-size:11px;color:#4f6ef7;font-weight:600">(나)</span>':'')+'</div><div class="order-menu">'+esc(o.order)+'</div>'+priceHtml+(o.memo?'<div class="order-memo">💬 '+esc(o.memo)+'</div>':'')+'</div>';
+    var paidHtml=canPay
+      ?'<button onclick="togglePaid(\''+oKey+'\','+isPaid+')" style="margin-top:8px;padding:6px 14px;border:none;border-radius:8px;background:'+(isPaid?'#28a745':'#e0e0e0')+';color:'+(isPaid?'#fff':'#555')+';font-size:12px;font-weight:700;cursor:pointer">'+(isPaid?'✅ 입금완료':'💸 입금확인')+'</button>'
+      :(isPaid?'<div style="margin-top:6px;font-size:12px;color:#28a745;font-weight:700">✅ 입금완료</div>':'<div style="margin-top:6px;font-size:12px;color:#aaa">💸 입금 대기중</div>');
+    return '<div class="order-item" style="'+(isMe?'border-color:#4f6ef7;':'')+(isPaid?'background:#f0fff4;border-color:#28a745;':'')+'"><div class="order-name">'+(isMe?'⭐':'🙋')+' '+esc(o.name)+(isMe?' <span style="font-size:11px;color:#4f6ef7;font-weight:600">(나)</span>':'')+'</div><div class="order-menu">'+esc(o.order)+'</div>'+priceHtml+paidHtml+(o.memo?'<div class="order-memo">💬 '+esc(o.memo)+'</div>':'')+'</div>';
   }).join('');
   var priced=orders.filter(function(o){return o.price!=null;});
+  var paidAll=orders.length>0&&orders.every(function(o){return o.paid===true;});
+  var paidCount=orders.filter(function(o){return o.paid===true;}).length;
   if(priced.length){
     var total=priced.reduce(function(s,o){return s+Number(o.price);},0);
     w.innerHTML+='<div style="margin-top:10px;padding:12px 16px;background:#f0f4ff;border-radius:10px;font-weight:700;color:#4f6ef7;font-size:15px">💰 합계: '+total.toLocaleString()+'원 <span style="font-weight:400;font-size:13px;color:#888">('+priced.length+'/'+orders.length+'명 입력)</span></div>';
   }
+  w.innerHTML+='<div style="margin-top:8px;padding:10px 16px;background:'+(paidAll?'#f0fff4':'#fff8e1')+';border-radius:10px;font-size:14px;font-weight:600;color:'+(paidAll?'#28a745':'#f9a825')+'">💳 입금 현황: '+paidCount+'/'+orders.length+'명 완료 '+(paidAll?'✅ 전원 입금 완료!':'')+'</div>';
+}
+
+function togglePaid(okey, isPaid){
+  db.ref('rooms/'+myCode+'/orders/'+okey).update({paid:!isPaid});
 }
 
 function savePriceByKey(okey){
