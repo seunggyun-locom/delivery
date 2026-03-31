@@ -106,7 +106,26 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 .memo-note .memo-del{position:absolute;top:4px;right:6px;background:none;border:none;cursor:pointer;font-size:14px;opacity:0;transition:opacity .2s}
 .memo-note:hover .memo-del{opacity:1}
 
-/* 메모 모달 */
+/* 메모 이모티콘 */
+.memo-reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.reaction-chip{display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;background:rgba(0,0,0,.08);font-size:13px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;user-select:none}
+.reaction-chip:hover{background:rgba(0,0,0,.15)}
+.reaction-chip.mine{border-color:#4f6ef7;background:rgba(79,110,247,.12)}
+.reaction-chip .r-count{font-size:12px;font-weight:700;color:#444}
+.reaction-add-btn{width:26px;height:26px;border-radius:50%;border:1.5px dashed #aaa;background:rgba(255,255,255,.6);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:#888;transition:all .15s}
+.reaction-add-btn:hover{background:#fff;border-color:#4f6ef7;color:#4f6ef7}
+
+/* 이모티콘 피커 */
+.emoji-picker{position:absolute;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.15);padding:12px;z-index:999;min-width:260px}
+.emoji-picker-tabs{display:flex;gap:4px;margin-bottom:10px;border-bottom:1px solid #f0f0f0;padding-bottom:8px}
+.emoji-picker-tab{padding:4px 10px;border:none;border-radius:8px;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:#888}
+.emoji-picker-tab.active{background:#f0f4ff;color:#4f6ef7}
+.emoji-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-height:180px;overflow-y:auto}
+.emoji-item{width:34px;height:34px;border:none;background:transparent;cursor:pointer;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;transition:background .1s}
+.emoji-item:hover{background:#f0f4ff}
+.emoji-item img{width:24px;height:24px;object-fit:contain}
+.emoji-upload-area{border:2px dashed #dde1f0;border-radius:10px;padding:12px;text-align:center;cursor:pointer;margin-top:8px;font-size:13px;color:#888}
+.emoji-upload-area:hover{border-color:#4f6ef7;color:#4f6ef7}
 #memo-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9997;align-items:center;justify-content:center;padding:20px}
 .memo-modal-box{background:#fff;border-radius:20px;padding:28px;max-width:380px;width:100%}
 .toast-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -193,9 +212,25 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
       </div>
       <div id="tab-memo-content" style="display:none">
         <!-- 메모판 -->
-        <div style="position:relative;width:100%;background:#fefce8;border-radius:16px;min-height:600px;border:2px dashed #fde68a;overflow:hidden;cursor:crosshair" id="memo-board">
+        <div style="position:relative;width:100%;background:#fefce8;border-radius:16px;min-height:600px;border:2px dashed #fde68a;overflow:visible;cursor:crosshair" id="memo-board">
           <div style="position:absolute;top:12px;left:12px;font-size:13px;color:#d97706;font-weight:600;pointer-events:none">📌 빈 곳을 클릭해서 메모를 남겨보세요!</div>
           <div id="memo-items"></div>
+          <!-- 이모티콘 피커 (메모판 안) -->
+          <div id="emoji-picker" class="emoji-picker" style="display:none;position:absolute">
+            <div class="emoji-picker-tabs">
+              <button class="emoji-picker-tab active" id="epick-tab-default" onclick="switchEmojiTab('default')">기본</button>
+              <button class="emoji-picker-tab" id="epick-tab-custom" onclick="switchEmojiTab('custom')">커스텀</button>
+            </div>
+            <div id="epick-default" class="emoji-grid"></div>
+            <div id="epick-custom" style="display:none">
+              <div class="emoji-grid" id="epick-custom-grid"></div>
+              <div class="emoji-upload-area" id="emoji-upload-area">
+                <input type="file" id="emoji-file-input" accept="image/png,image/gif,image/webp" style="display:none">
+                <div>🖼️ PNG/GIF 클릭해서 업로드</div>
+                <div style="font-size:11px;margin-top:3px">최대 200KB</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -595,6 +630,7 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('tab-pub').addEventListener('click',function(){switchTab('public');});
   document.getElementById('tab-priv').addEventListener('click',function(){switchTab('private');});
   document.getElementById('tab-memo').addEventListener('click',function(){switchTab('memo');});
+  initEmojiPicker();
 
   // 메모판 클릭
   var memoClickX=0, memoClickY=0, memoColor='#fef9c3';
@@ -1193,7 +1229,92 @@ async function saveManualMenus(){
   renderSavedMenus(text);alert('메뉴 목록이 저장되었습니다!');
 }
 
-// ── 메모판 ──
+// ── 이모티콘 피커 ──
+var DEFAULT_EMOJIS=['👍','😂','❤️','🔥','😮','😢','👏','🎉','😍','🤔','😡','🥹','💀','🫡','🤣','😎','🥰','🫶','✅','💯'];
+var currentEmojiMemoKey=null;
+var emojiPickerTab='default';
+
+function initEmojiPicker(){
+  // 기본 이모지 그리드
+  document.getElementById('epick-default').innerHTML=DEFAULT_EMOJIS.map(function(e){
+    return '<button class="emoji-item" onclick="addReaction(\''+e+'\')">'+e+'</button>';
+  }).join('');
+  // 업로드
+  document.getElementById('emoji-upload-area').addEventListener('click',function(){document.getElementById('emoji-file-input').click();});
+  document.getElementById('emoji-file-input').addEventListener('change',function(){uploadCustomEmoji(this);});
+  // 외부 클릭 시 닫기
+  document.addEventListener('click',function(e){
+    var picker=document.getElementById('emoji-picker');
+    if(picker.style.display!=='none'&&!picker.contains(e.target)&&!e.target.classList.contains('reaction-add-btn')){
+      picker.style.display='none';
+    }
+  });
+}
+
+function switchEmojiTab(tab){
+  emojiPickerTab=tab;
+  document.getElementById('epick-default').style.display=tab==='default'?'grid':'none';
+  document.getElementById('epick-custom').style.display=tab==='custom'?'block':'none';
+  document.getElementById('epick-tab-default').classList.toggle('active',tab==='default');
+  document.getElementById('epick-tab-custom').classList.toggle('active',tab==='custom');
+  if(tab==='custom') loadCustomEmojis();
+}
+
+async function loadCustomEmojis(){
+  var snap=await db.ref('customEmojis').get();
+  var grid=document.getElementById('epick-custom-grid');
+  if(!snap.exists()){grid.innerHTML='<div style="color:#aaa;font-size:12px;padding:8px;grid-column:span 7">아직 커스텀 이모티콘이 없어요</div>';return;}
+  var emojis=snap.val();
+  grid.innerHTML=Object.entries(emojis).map(function(e){
+    return '<button class="emoji-item" onclick="addReaction(\''+e[0]+'\')" title="'+e[0]+'">'
+      +'<img src="'+e[1].url+'" alt="'+e[0]+'">'
+      +'</button>';
+  }).join('');
+}
+
+async function uploadCustomEmoji(input){
+  var file=input.files[0];
+  if(!file)return;
+  if(file.size>200*1024){alert('파일이 너무 커요! 200KB 이하로 올려주세요.');return;}
+  var name=file.name.replace(/\.[^/.]+$/,'').replace(/[^a-zA-Z0-9가-힣_]/g,'_');
+  var reader=new FileReader();
+  reader.onload=async function(e){
+    await db.ref('customEmojis/'+name).set({url:e.target.result,uploadedBy:myName,ts:Date.now()});
+    loadCustomEmojis();
+    alert(':'+name+': 이모티콘이 추가됐어요!');
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+
+function openEmojiPicker(memoKey, btn){
+  currentEmojiMemoKey=memoKey;
+  var picker=document.getElementById('emoji-picker');
+  var rect=btn.getBoundingClientRect();
+  var boardRect=document.getElementById('memo-board').getBoundingClientRect();
+  picker.style.display='block';
+  // 위치 조정
+  var left=rect.left-boardRect.left-250;
+  var top=rect.top-boardRect.top-220;
+  if(left<0)left=rect.left-boardRect.left+30;
+  if(top<0)top=rect.top-boardRect.top+30;
+  picker.style.left=left+'px';
+  picker.style.top=top+'px';
+  switchEmojiTab('default');
+}
+
+async function addReaction(emoji){
+  if(!currentEmojiMemoKey)return;
+  document.getElementById('emoji-picker').style.display='none';
+  var rKey='memos/'+currentEmojiMemoKey+'/reactions/'+emoji.replace(/[^a-zA-Z0-9가-힣_]/g,function(c){return c.codePointAt(0).toString(16);});
+  var snap=await db.ref(rKey+'/'+currentUser.uid.replace(/[^a-zA-Z0-9]/g,'_')).get();
+  if(snap.exists()){
+    // 이미 눌렀으면 취소
+    await db.ref(rKey+'/'+currentUser.uid.replace(/[^a-zA-Z0-9]/g,'_')).remove();
+  } else {
+    await db.ref(rKey+'/'+currentUser.uid.replace(/[^a-zA-Z0-9]/g,'_')).set(myName);
+  }
+}
 var memoListener=null;
 function loadMemos(){
   if(memoListener){db.ref('memos').off('value',memoListener);memoListener=null;}
