@@ -532,191 +532,172 @@ var DEFAULT_EMOJIS = ['👍','😂','❤️','🔥','😮','😢','👏','🎉',
 var CHAT_EMOJIS = ['👍','😂','❤️','🔥','😮','😢','👏','🎉','😍','🤔','😡','🥹','💀','🫡','🤣','😎','🥰','🫶','✅','💯','🍜','🙏','😭','🤩'];
 var curEmojiKey = null, memoClickX = 0, memoClickY = 0, memoColor = '#fef9c3';
 var curChatMsgKey = null;
-
 var ROULETTE_STORES = ['GTS버거','고돼지','고봉민김밥','교동홀도시락','국수나무','꾸이한끼','담솔','대한냉면','던킨도너츠','롯데리아','마녀김밥','마시어때','마왕족발','맘스터치','맥도날드','문막집','바스버거','백나예김밥','백소정','버거킹','버텍스','본도시락','본죽','봉구스밥버거','상아김밥','샐러디','샐러드박스','서브웨이','슬로우캘리','스쿨푸드','싸움의고수','쌍팔반점','숯불고기냉면','수타우동젠','암샘김밥','영심이떡볶이김밥','오니기리와이규동','오레노카츠','오토김밥','올라포케','올레샐러드','올리아테이블','우리할매떡볶이','이삭토스트','인생냉면','잭슨피자','진된장','진부엉이꼬마김밥','죽도령','처갓집양념치킨','청년홍국수','칠리로29','KFC','킹콩부대찌개','퀴즈노스','탄탄면공방','판미각','파스타예요','플램잭트리','하루엔소쿠','하루일과달밥','한울김밥','해피치즈스마일','헤이올리브','현대육','호미스피자','호호솥밥','홍콩반점','후토루'];
 var RCOLORS = ['#534AB7','#1D9E75','#D85A30','#185FA5','#D4537E','#639922','#BA7517','#A32D2D','#3C3489','#0F6E56','#993C1D','#0C447C','#993556','#3B6D11','#854F0B','#4f6ef7','#e53935','#ff7043'];
 var rSelected = [], rAngle = 0, rSpinning = false, rRaf = null;
 var rConfettiArr = [], rConfRaf = null, rConfActive = false;
 
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function genCode() { return Array.from({length:4}, function(){ return 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]; }).join(''); }
-function getYM() { var d = new Date(); return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0'); }
-function getRoomColor(c) { return COLOR_MAP[c] || COLOR_MAP.yellow; }
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function genCode(){return Array.from({length:4},function(){return 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)];}).join('');}
+function getYM(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');}
+function getRoomColor(c){return COLOR_MAP[c]||COLOR_MAP.yellow;}
+function setScreen(id){['s-auth','s-rooms','screen-room'].forEach(function(s){var e=document.getElementById(s);if(e){e.style.display='none';e.classList.remove('active');}});var t=document.getElementById(id);if(t){t.style.display=(id==='s-auth')?'flex':'block';t.classList.add('active');}window.scrollTo({top:0,behavior:'smooth'});}
+function saveSession(){localStorage.setItem('lc_r',JSON.stringify({myCode:myCode,myRole:myRole,roomType:roomType}));}
+function clearSession(){localStorage.removeItem('lc_r');}
+function loadSession(){try{var d=JSON.parse(localStorage.getItem('lc_r')||'{}');myCode=d.myCode||'';myRole=d.myRole||'';roomType=d.roomType||'';}catch(e){myCode='';myRole='';roomType='';}}
 
-function setScreen(id) {
-  ['s-auth','s-rooms','screen-room'].forEach(function(s){ var e=document.getElementById(s); if(e){e.style.display='none';e.classList.remove('active');} });
-  var t = document.getElementById(id);
-  if(t){ t.style.display = (id==='s-auth') ? 'flex' : 'block'; t.classList.add('active'); }
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-function saveSession() { localStorage.setItem('lc_r', JSON.stringify({myCode:myCode, myRole:myRole, roomType:roomType})); }
-function clearSession() { localStorage.removeItem('lc_r'); }
-function loadSession() { try{ var d=JSON.parse(localStorage.getItem('lc_r')||'{}'); myCode=d.myCode||''; myRole=d.myRole||''; roomType=d.roomType||''; }catch(e){ myCode=''; myRole=''; roomType=''; } }
-
-// ── Presence ──
-function startPresence() {
-  if(!cu || !db) return;
-  try {
-    var uid = cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
-    var ref = db.ref('presence/'+uid);
-    presenceRef = ref;
-    ref.set({name:myName, online:true, lastSeen:Date.now()}).catch(function(){});
-    ref.onDisconnect().update({online:false, lastSeen:Date.now()}).catch(function(){});
-    if(presenceTmr) clearInterval(presenceTmr);
-    presenceTmr = setInterval(function(){ ref.update({lastSeen:Date.now()}).catch(function(){}); }, 30000);
+function startPresence(){
+  if(!cu||!db)return;
+  try{
+    var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
+    var ref=db.ref('presence/'+uid);
+    presenceRef=ref;
+    db.ref('users/'+uid).set({name:myName,uid:uid}).catch(function(){});
+    ref.set({name:myName,online:true,lastSeen:Date.now()}).catch(function(){});
+    ref.onDisconnect().update({online:false,lastSeen:Date.now()}).catch(function(){});
+    if(presenceTmr)clearInterval(presenceTmr);
+    presenceTmr=setInterval(function(){ref.update({lastSeen:Date.now()}).catch(function(){});},30000);
     loadOnlineUsers();
-  } catch(e) { console.warn('presence err', e); }
+  }catch(e){console.warn('presence err',e);}
 }
-
-function stopPresence() {
-  if(presenceRef){ presenceRef.update({online:false, lastSeen:Date.now()}).catch(function(){}); presenceRef = null; }
-  if(presenceTmr){ clearInterval(presenceTmr); presenceTmr = null; }
+function stopPresence(){
+  if(presenceRef){presenceRef.update({online:false,lastSeen:Date.now()}).catch(function(){});presenceRef=null;}
+  if(presenceTmr){clearInterval(presenceTmr);presenceTmr=null;}
 }
-
-function loadOnlineUsers() {
-  if(!db) return;
-  db.ref('presence').get().then(function(snap){
-    var el = document.getElementById('online-users-list');
-    var cntEl = document.getElementById('online-count');
-    if(!el) return;
-    if(!snap.exists()){ el.innerHTML='<div style="color:#aaa;font-size:13px">아직 아무도 없어요</div>'; return; }
-    var now = Date.now();
-    var users = Object.values(snap.val()).filter(function(u){ return u.name; });
-    users.forEach(function(u){ u._on = u.online && (now-(u.lastSeen||0)) < 5*60*1000; });
-    users.sort(function(a,b){ return (b._on?1:0)-(a._on?1:0); });
-    var onCnt = users.filter(function(u){ return u._on; }).length;
-    if(cntEl) cntEl.textContent = '(온라인 '+onCnt+'명 / 전체 '+users.length+'명)';
-    el.innerHTML = users.map(function(u){
-      var initial = (u.name||'?').charAt(0).toUpperCase();
-      return '<div class="user-chip '+(u._on?'online':'offline')+'">'
-        +'<div class="online-dot '+(u._on?'on':'off')+'"></div>'
-        +'<div style="width:24px;height:24px;border-radius:50%;background:'+(u._on?'#43a047':'#bbb')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+initial+'</div>'
+function loadOnlineUsers(){
+  if(!db)return;
+  Promise.all([db.ref('users').get(),db.ref('presence').get()]).then(function(results){
+    var usersSnap=results[0],presSnap=results[1];
+    var el=document.getElementById('online-users-list');
+    var cntEl=document.getElementById('online-count');
+    if(!el)return;
+    if(!usersSnap.exists()){el.innerHTML='<div style="color:#aaa;font-size:13px">아직 아무도 없어요</div>';return;}
+    var now=Date.now();
+    var presMap=presSnap.exists()?presSnap.val():{};
+    var users=Object.entries(usersSnap.val()).map(function(e){
+      var uid=e[0],u=e[1],p=presMap[uid]||{};
+      return {name:u.name,online:p.online&&(now-(p.lastSeen||0))<5*60*1000};
+    });
+    users.sort(function(a,b){return (b.online?1:0)-(a.online?1:0);});
+    var onCnt=users.filter(function(u){return u.online;}).length;
+    if(cntEl)cntEl.textContent='(온라인 '+onCnt+'명 / 전체 '+users.length+'명)';
+    el.innerHTML=users.map(function(u){
+      var initial=(u.name||'?').charAt(0).toUpperCase();
+      return '<div class="user-chip '+(u.online?'online':'offline')+'">'
+        +'<div class="online-dot '+(u.online?'on':'off')+'"></div>'
+        +'<div style="width:24px;height:24px;border-radius:50%;background:'+(u.online?'#43a047':'#bbb')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+initial+'</div>'
         +esc(u.name)+'</div>';
     }).join('');
-  }).catch(function(e){ console.warn('loadOnlineUsers err',e); });
+  }).catch(function(e){console.warn('loadOnlineUsers err',e);});
 }
 
-// ── Roulette ──
-function rInitStoreList() {
-  document.getElementById('r-search').oninput = rFilterStores;
-  rRenderStoreList(ROULETTE_STORES);
-}
-function rFilterStores() { var q=document.getElementById('r-search').value.trim().toLowerCase(); rRenderStoreList(q?ROULETTE_STORES.filter(function(s){return s.toLowerCase().includes(q);}):ROULETTE_STORES); }
-function rRenderStoreList(list) {
-  document.getElementById('r-store-list').innerHTML = list.map(function(s){
-    var added = rSelected.includes(s);
-    return '<button class="r-store-btn'+(added?' r-added':'')+'" onclick="rToggleStore(\''+s+'\')">'+s+(added?' ✓':'')+'</button>';
-  }).join('');
-}
-function rToggleStore(s) { if(rSelected.includes(s)) rSelected=rSelected.filter(function(x){return x!==s;}); else rSelected.push(s); rUpdate(); rFilterStores(); }
-function rUpdate() {
-  var n = rSelected.length;
-  document.getElementById('r-cnt').textContent = n;
-  document.getElementById('r-spin-btn').disabled = n<2 || rSpinning;
-  var slots = document.getElementById('r-slots');
-  if(!n){ slots.innerHTML='<span style="font-size:13px;color:#bbb">← 가게를 추가하세요</span>'; rDrawWheel(); return; }
-  slots.innerHTML = rSelected.map(function(s){ return '<span class="r-chip">'+s+'<button class="r-chip-rm" onclick="rToggleStore(\''+s+'\')">×</button></span>'; }).join('');
+function rInitStoreList(){document.getElementById('r-search').oninput=rFilterStores;rRenderStoreList(ROULETTE_STORES);}
+function rFilterStores(){var q=document.getElementById('r-search').value.trim().toLowerCase();rRenderStoreList(q?ROULETTE_STORES.filter(function(s){return s.toLowerCase().includes(q);}):ROULETTE_STORES);}
+function rRenderStoreList(list){document.getElementById('r-store-list').innerHTML=list.map(function(s){var added=rSelected.includes(s);return '<button class="r-store-btn'+(added?' r-added':'')+'" onclick="rToggleStore(\''+s+'\')">'+s+(added?' ✓':'')+'</button>';}).join('');}
+function rToggleStore(s){if(rSelected.includes(s))rSelected=rSelected.filter(function(x){return x!==s;});else rSelected.push(s);rUpdate();rFilterStores();}
+function rUpdate(){
+  var n=rSelected.length;
+  document.getElementById('r-cnt').textContent=n;
+  document.getElementById('r-spin-btn').disabled=n<2||rSpinning;
+  var slots=document.getElementById('r-slots');
+  if(!n){slots.innerHTML='<span style="font-size:13px;color:#bbb">← 가게를 추가하세요</span>';rDrawWheel();return;}
+  slots.innerHTML=rSelected.map(function(s){return '<span class="r-chip">'+s+'<button class="r-chip-rm" onclick="rToggleStore(\''+s+'\')">×</button></span>';}).join('');
   rDrawWheel();
 }
-function rDrawWheel() {
-  var cv=document.getElementById('r-wheel'), ctx=cv.getContext('2d'), n=rSelected.length;
+function rDrawWheel(){
+  var cv=document.getElementById('r-wheel'),ctx=cv.getContext('2d'),n=rSelected.length;
   ctx.clearRect(0,0,600,600);
-  if(!n){ ctx.beginPath(); ctx.arc(300,300,280,0,2*Math.PI); ctx.fillStyle='#f0f4ff'; ctx.fill(); ctx.fillStyle='#aaa'; ctx.font='bold 18px Segoe UI,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('가게를 2개 이상 추가하세요',300,300); return; }
-  var arc = 2*Math.PI/n;
-  for(var i=0; i<n; i++){
-    var a0=rAngle+arc*i, a1=a0+arc;
-    ctx.beginPath(); ctx.moveTo(300,300); ctx.arc(300,300,280,a0,a1); ctx.closePath();
-    ctx.fillStyle=RCOLORS[i%RCOLORS.length]; ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=2; ctx.stroke();
-    ctx.save(); ctx.translate(300,300); ctx.rotate(a0+arc/2);
-    var txt=rSelected[i], fs=Math.min(26,Math.max(16,26-Math.floor(txt.length/2)));
-    ctx.font='800 '+fs+'px Segoe UI,sans-serif'; ctx.fillStyle='#fff'; ctx.textAlign='right'; ctx.textBaseline='middle';
-    ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=6;
-    ctx.fillText(txt.length>10?txt.slice(0,9)+'…':txt, 268, 0);
+  if(!n){ctx.beginPath();ctx.arc(300,300,280,0,2*Math.PI);ctx.fillStyle='#f0f4ff';ctx.fill();ctx.fillStyle='#aaa';ctx.font='bold 18px Segoe UI,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('가게를 2개 이상 추가하세요',300,300);return;}
+  var arc=2*Math.PI/n;
+  for(var i=0;i<n;i++){
+    var a0=rAngle+arc*i,a1=a0+arc;
+    ctx.beginPath();ctx.moveTo(300,300);ctx.arc(300,300,280,a0,a1);ctx.closePath();
+    ctx.fillStyle=RCOLORS[i%RCOLORS.length];ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;ctx.stroke();
+    ctx.save();ctx.translate(300,300);ctx.rotate(a0+arc/2);
+    var txt=rSelected[i],fs=Math.min(26,Math.max(16,26-Math.floor(txt.length/2)));
+    ctx.font='800 '+fs+'px Segoe UI,sans-serif';ctx.fillStyle='#fff';ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=6;
+    ctx.fillText(txt.length>10?txt.slice(0,9)+'…':txt,268,0);
     ctx.restore();
   }
-  ctx.beginPath(); ctx.arc(300,300,280,0,2*Math.PI); ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=4; ctx.stroke();
-  ctx.beginPath(); ctx.arc(300,300,34,0,2*Math.PI);
-  var cg=ctx.createRadialGradient(300,300,0,300,300,34); cg.addColorStop(0,'#fff'); cg.addColorStop(1,'#e8edff');
-  ctx.fillStyle=cg; ctx.shadowColor='rgba(0,0,0,.2)'; ctx.shadowBlur=10; ctx.fill(); ctx.shadowBlur=0;
-  ctx.font='bold 14px Segoe UI,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#4f6ef7'; ctx.fillText('GO!',300,300);
+  ctx.beginPath();ctx.arc(300,300,280,0,2*Math.PI);ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=4;ctx.stroke();
+  ctx.beginPath();ctx.arc(300,300,34,0,2*Math.PI);
+  var cg=ctx.createRadialGradient(300,300,0,300,300,34);cg.addColorStop(0,'#fff');cg.addColorStop(1,'#e8edff');
+  ctx.fillStyle=cg;ctx.shadowColor='rgba(0,0,0,.2)';ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
+  ctx.font='bold 14px Segoe UI,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#4f6ef7';ctx.fillText('GO!',300,300);
 }
-function rSpin() {
-  if(rSpinning || rSelected.length<2) return;
-  rSpinning=true; document.getElementById('r-spin-btn').disabled=true; document.getElementById('r-spin-btn').textContent='🎡 돌아가는 중...';
-  var extra=2*Math.PI*(6+Math.random()*10), dur=4500+Math.random()*2000, startAngle=rAngle, start=performance.now();
-  function ease(t){ return t<1 ? 1-Math.pow(1-t,4) : 1; }
-  function frame(now){ var t=Math.min((now-start)/dur,1); rAngle=startAngle+extra*ease(t); rDrawWheel(); if(t<1) rRaf=requestAnimationFrame(frame); else{ rAngle=rAngle%(2*Math.PI); rDrawWheel(); rFinish(); } }
+function rSpin(){
+  if(rSpinning||rSelected.length<2)return;
+  rSpinning=true;document.getElementById('r-spin-btn').disabled=true;document.getElementById('r-spin-btn').textContent='🎡 돌아가는 중...';
+  var extra=2*Math.PI*(6+Math.random()*10),dur=4500+Math.random()*2000,startAngle=rAngle,start=performance.now();
+  function ease(t){return t<1?1-Math.pow(1-t,4):1;}
+  function frame(now){var t=Math.min((now-start)/dur,1);rAngle=startAngle+extra*ease(t);rDrawWheel();if(t<1)rRaf=requestAnimationFrame(frame);else{rAngle=rAngle%(2*Math.PI);rDrawWheel();rFinish();}}
   rRaf=requestAnimationFrame(frame);
 }
-function rFinish() {
-  rSpinning=false; document.getElementById('r-spin-btn').textContent='🎡 돌리기!'; document.getElementById('r-spin-btn').disabled=false;
-  var n=rSelected.length, arc=2*Math.PI/n;
-  var pointerInWheel = (((-Math.PI/2 - rAngle) % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
-  var idx = Math.floor(pointerInWheel/arc) % n;
-  setTimeout(function(){ rShowResult(rSelected[idx]); }, 400);
+function rFinish(){
+  rSpinning=false;document.getElementById('r-spin-btn').textContent='🎡 돌리기!';document.getElementById('r-spin-btn').disabled=false;
+  var n=rSelected.length,arc=2*Math.PI/n;
+  var pointerInWheel=(((-Math.PI/2-rAngle)%(2*Math.PI))+(2*Math.PI))%(2*Math.PI);
+  var idx=Math.floor(pointerInWheel/arc)%n;
+  setTimeout(function(){rShowResult(rSelected[idx]);},400);
 }
-function rShowResult(name) { document.getElementById('r-res-name').textContent=name; document.getElementById('r-overlay').style.display='flex'; rLaunchConfetti(); }
-function rCloseResult() { document.getElementById('r-overlay').style.display='none'; rStopConfetti(); }
+function rShowResult(name){document.getElementById('r-res-name').textContent=name;document.getElementById('r-overlay').style.display='flex';rLaunchConfetti();}
+function rCloseResult(){document.getElementById('r-overlay').style.display='none';rStopConfetti();}
 var rConfColors=['#534AB7','#1D9E75','#D85A30','#e24b4a','#185FA5','#D4537E','#EF9F27','#fff','#4f6ef7','#ff7043','#FFD700'];
-function rMakeParticle(){ return {x:Math.random()*window.innerWidth,y:-20-Math.random()*300,vx:(Math.random()-.5)*10,vy:2+Math.random()*8,rot:Math.random()*360,rotV:(Math.random()-.5)*12,w:6+Math.random()*12,h:4+Math.random()*6,c:rConfColors[Math.floor(Math.random()*rConfColors.length)],alpha:1,shape:Math.random()>.5?'rect':'circle'}; }
-function rLaunchConfetti(){ var cv=document.getElementById('r-confetti'); cv.width=window.innerWidth; cv.height=window.innerHeight; rConfActive=true; rConfettiArr=[]; for(var i=0;i<220;i++) rConfettiArr.push(rMakeParticle()); if(rConfRaf) cancelAnimationFrame(rConfRaf); rAnimConf(); setTimeout(rStopConfetti,5000); }
-function rAnimConf(){ if(!rConfActive) return; var cv=document.getElementById('r-confetti'),ctx=cv.getContext('2d'); ctx.clearRect(0,0,cv.width,cv.height); rConfettiArr.forEach(function(p){ p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.rot+=p.rotV; if(p.y>cv.height-50) p.alpha=Math.max(0,p.alpha-.03); ctx.save();ctx.globalAlpha=p.alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.c; if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.w/2,0,2*Math.PI);ctx.fill();}else ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); }); rConfettiArr=rConfettiArr.filter(function(p){return p.alpha>0;}); if(rConfettiArr.length) rConfRaf=requestAnimationFrame(rAnimConf); }
-function rStopConfetti(){ rConfActive=false; if(rConfRaf) cancelAnimationFrame(rConfRaf); var cv=document.getElementById('r-confetti'); cv.getContext('2d').clearRect(0,0,cv.width,cv.height); }
-
+function rMakeParticle(){return{x:Math.random()*window.innerWidth,y:-20-Math.random()*300,vx:(Math.random()-.5)*10,vy:2+Math.random()*8,rot:Math.random()*360,rotV:(Math.random()-.5)*12,w:6+Math.random()*12,h:4+Math.random()*6,c:rConfColors[Math.floor(Math.random()*rConfColors.length)],alpha:1,shape:Math.random()>.5?'rect':'circle'};}
+function rLaunchConfetti(){var cv=document.getElementById('r-confetti');cv.width=window.innerWidth;cv.height=window.innerHeight;rConfActive=true;rConfettiArr=[];for(var i=0;i<220;i++)rConfettiArr.push(rMakeParticle());if(rConfRaf)cancelAnimationFrame(rConfRaf);rAnimConf();setTimeout(rStopConfetti,5000);}
+function rAnimConf(){if(!rConfActive)return;var cv=document.getElementById('r-confetti'),ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);rConfettiArr.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.rot+=p.rotV;if(p.y>cv.height-50)p.alpha=Math.max(0,p.alpha-.03);ctx.save();ctx.globalAlpha=p.alpha;ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.c;if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.w/2,0,2*Math.PI);ctx.fill();}else ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});rConfettiArr=rConfettiArr.filter(function(p){return p.alpha>0;});if(rConfettiArr.length)rConfRaf=requestAnimationFrame(rAnimConf);}
+function rStopConfetti(){rConfActive=false;if(rConfRaf)cancelAnimationFrame(rConfRaf);var cv=document.getElementById('r-confetti');cv.getContext('2d').clearRect(0,0,cv.width,cv.height);}
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded',function(){
   firebase.initializeApp({apiKey:"AIzaSyBh57wKf-p2i-AobrETwmn5H6Jxi3f4boQ",authDomain:"food-delivery-be16c.firebaseapp.com",databaseURL:"https://food-delivery-be16c-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"food-delivery-be16c",storageBucket:"food-delivery-be16c.firebasestorage.app",messagingSenderId:"1044561065851",appId:"1:1044561065851:web:6997db11d88eaadf72afde"});
-  auth = firebase.auth();
-  db = firebase.database();
+  auth=firebase.auth();db=firebase.database();
 
-  document.getElementById('google-login-btn').onclick = function(){ auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e){ if(e.code!=='auth/popup-closed-by-user') document.getElementById('l-err').textContent='로그인 오류: '+e.message; }); };
-  document.getElementById('logout-btn').onclick = function(){ stopAll(); clearSession(); auth.signOut(); };
-  document.getElementById('create-room-btn').onclick = showCreateModal;
-  document.getElementById('cancel-create-btn').onclick = function(){ document.getElementById('create-modal').style.display='none'; };
-  document.getElementById('confirm-create-btn').onclick = createRoom;
-  document.getElementById('type-public').onclick = function(){ selRoomType('public'); };
-  document.getElementById('type-private').onclick = function(){ selRoomType('private'); };
-  document.getElementById('c-title-select').onchange = function(){ document.getElementById('c-title').style.display=(this.value==='__direct__')?'block':'none'; };
-  document.getElementById('back-btn').onclick = goBack;
-  document.getElementById('r-delete-btn').onclick = deleteRoom;
-  document.getElementById('copy-code-btn').onclick = function(){ navigator.clipboard.writeText(myCode).then(function(){ alert('복사 완료!'); }); };
-  document.getElementById('save-bank-btn').onclick = saveBank;
-  document.getElementById('copy-bank-btn').onclick = function(){ navigator.clipboard.writeText(document.getElementById('p-bank-val').textContent).then(function(){ alert('복사!'); }); };
-  document.getElementById('upload-area').onclick = function(){ document.getElementById('img-input').click(); };
-  document.getElementById('img-input').onchange = function(){ handleImages(this); };
-  document.getElementById('ai-btn').onclick = analyzeMenus;
-  document.getElementById('save-ai-btn').onclick = saveAiMenus;
-  document.getElementById('save-manual-btn').onclick = saveManualMenus;
-  document.getElementById('open-btn').onclick = function(){ db.ref('rooms/'+myCode).update({open:true,done:false}); };
-  document.getElementById('close-btn').onclick = function(){ db.ref('rooms/'+myCode).update({open:false}); };
-  document.getElementById('prev-img-btn').onclick = prevImg;
-  document.getElementById('next-img-btn').onclick = nextImg;
-  document.getElementById('download-img-btn').onclick = function(){ downloadImg(imgIdx); };
-  document.getElementById('p-main-img').onclick = function(){ openLightbox(imgIdx); };
-  document.getElementById('submit-order-btn').onclick = submitOrder;
-  document.getElementById('cancel-order-btn').onclick = cancelOrder;
-  document.getElementById('chat-send-btn').onclick = sendChat;
-  document.getElementById('chat-input').onkeydown = function(e){ if(e.key==='Enter') sendChat(); };
-  document.getElementById('lb-close-btn').onclick = closeLightbox;
-  document.getElementById('lb-download-btn').onclick = function(){ downloadImg(imgIdx); };
-  document.getElementById('lb-prev-btn').onclick = function(){ prevImg(); if(lb.canvas){ lb.img.src=images[imgIdx]; document.getElementById('lb-counter').textContent=(imgIdx+1)+'/'+images.length; } };
-  document.getElementById('lb-next-btn').onclick = function(){ nextImg(); if(lb.canvas){ lb.img.src=images[imgIdx]; document.getElementById('lb-counter').textContent=(imgIdx+1)+'/'+images.length; } };
-  document.getElementById('lightbox').onclick = function(e){ if(e.target===this) closeLightbox(); };
-  document.getElementById('rank-tab-amount').onclick = function(){ currentRankTab='amount'; this.classList.add('active'); document.getElementById('rank-tab-count').classList.remove('active'); loadRanking(); };
-  document.getElementById('rank-tab-count').onclick = function(){ currentRankTab='count'; this.classList.add('active'); document.getElementById('rank-tab-amount').classList.remove('active'); loadRanking(); };
-  document.getElementById('join-private-btn').onclick = joinPrivate;
-  document.getElementById('priv-code').oninput = function(){ this.value=this.value.toUpperCase(); };
-  document.getElementById('priv-code').onkeydown = function(e){ if(e.key==='Enter') joinPrivate(); };
-  document.querySelectorAll('.tab-btn').forEach(function(btn){ btn.onclick=function(){ switchTab(this.dataset.tab); }; });
-  document.addEventListener('click', function(e){
-    var picker = document.getElementById('chat-emoji-picker');
-    if(picker && picker.style.display!=='none' && !picker.contains(e.target) && !e.target.classList.contains('chat-add-reaction')) picker.style.display='none';
-  });
+  document.getElementById('google-login-btn').onclick=function(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e){if(e.code!=='auth/popup-closed-by-user')document.getElementById('l-err').textContent='로그인 오류: '+e.message;});};
+  document.getElementById('logout-btn').onclick=function(){stopAll();clearSession();auth.signOut();};
+  document.getElementById('create-room-btn').onclick=showCreateModal;
+  document.getElementById('cancel-create-btn').onclick=function(){document.getElementById('create-modal').style.display='none';};
+  document.getElementById('confirm-create-btn').onclick=createRoom;
+  document.getElementById('type-public').onclick=function(){selRoomType('public');};
+  document.getElementById('type-private').onclick=function(){selRoomType('private');};
+  document.getElementById('c-title-select').onchange=function(){document.getElementById('c-title').style.display=(this.value==='__direct__')?'block':'none';};
+  document.getElementById('back-btn').onclick=goBack;
+  document.getElementById('r-delete-btn').onclick=deleteRoom;
+  document.getElementById('copy-code-btn').onclick=function(){navigator.clipboard.writeText(myCode).then(function(){alert('복사 완료!');});};
+  document.getElementById('save-bank-btn').onclick=saveBank;
+  document.getElementById('copy-bank-btn').onclick=function(){navigator.clipboard.writeText(document.getElementById('p-bank-val').textContent).then(function(){alert('복사!');});};
+  document.getElementById('upload-area').onclick=function(){document.getElementById('img-input').click();};
+  document.getElementById('img-input').onchange=function(){handleImages(this);};
+  document.getElementById('ai-btn').onclick=analyzeMenus;
+  document.getElementById('save-ai-btn').onclick=saveAiMenus;
+  document.getElementById('save-manual-btn').onclick=saveManualMenus;
+  document.getElementById('open-btn').onclick=function(){db.ref('rooms/'+myCode).update({open:true,done:false});};
+  document.getElementById('close-btn').onclick=function(){db.ref('rooms/'+myCode).update({open:false});};
+  document.getElementById('prev-img-btn').onclick=prevImg;
+  document.getElementById('next-img-btn').onclick=nextImg;
+  document.getElementById('download-img-btn').onclick=function(){downloadImg(imgIdx);};
+  document.getElementById('p-main-img').onclick=function(){openLightbox(imgIdx);};
+  document.getElementById('submit-order-btn').onclick=submitOrder;
+  document.getElementById('cancel-order-btn').onclick=cancelOrder;
+  document.getElementById('chat-send-btn').onclick=sendChat;
+  document.getElementById('chat-input').onkeydown=function(e){if(e.key==='Enter')sendChat();};
+  document.getElementById('lb-close-btn').onclick=closeLightbox;
+  document.getElementById('lb-download-btn').onclick=function(){downloadImg(imgIdx);};
+  document.getElementById('lb-prev-btn').onclick=function(){prevImg();if(lb.canvas){lb.img.src=images[imgIdx];document.getElementById('lb-counter').textContent=(imgIdx+1)+'/'+images.length;}};
+  document.getElementById('lb-next-btn').onclick=function(){nextImg();if(lb.canvas){lb.img.src=images[imgIdx];document.getElementById('lb-counter').textContent=(imgIdx+1)+'/'+images.length;}};
+  document.getElementById('lightbox').onclick=function(e){if(e.target===this)closeLightbox();};
+  document.getElementById('rank-tab-amount').onclick=function(){currentRankTab='amount';this.classList.add('active');document.getElementById('rank-tab-count').classList.remove('active');loadRanking();};
+  document.getElementById('rank-tab-count').onclick=function(){currentRankTab='count';this.classList.add('active');document.getElementById('rank-tab-amount').classList.remove('active');loadRanking();};
+  document.getElementById('join-private-btn').onclick=joinPrivate;
+  document.getElementById('priv-code').oninput=function(){this.value=this.value.toUpperCase();};
+  document.getElementById('priv-code').onkeydown=function(e){if(e.key==='Enter')joinPrivate();};
+  document.querySelectorAll('.tab-btn').forEach(function(btn){btn.onclick=function(){switchTab(this.dataset.tab);};});
+  document.addEventListener('click',function(e){var picker=document.getElementById('chat-emoji-picker');if(picker&&picker.style.display!=='none'&&!picker.contains(e.target)&&!e.target.classList.contains('chat-add-reaction'))picker.style.display='none';});
 
   initMemo();
   rInitStoreList();
@@ -724,57 +705,64 @@ document.addEventListener('DOMContentLoaded', function(){
 
   auth.onAuthStateChanged(function(user){
     if(user){
-      cu=user; myName=user.displayName||user.email.split('@')[0];
+      cu=user;myName=user.displayName||user.email.split('@')[0];
       updateNav();
-      try{ loadSession(); }catch(e){}
-      if(myCode && myRole){
+      try{loadSession();}catch(e){}
+      if(myCode&&myRole){
         db.ref('rooms/'+myCode).get().then(function(s){
-          if(s.exists()){ stopAll(); startRoom(myCode,myRole,s.val().type||'public'); }
-          else{ clearSession(); showRooms(); }
-        }).catch(function(){ clearSession(); showRooms(); });
-      } else {
-        showRooms();
-      }
-    } else {
-      cu=null; myName=''; stopAll(); setScreen('s-auth');
-    }
+          if(s.exists()){stopAll();startRoom(myCode,myRole,s.val().type||'public');}
+          else{clearSession();showRooms();}
+        }).catch(function(){clearSession();showRooms();});
+      }else{showRooms();}
+    }else{cu=null;myName='';stopAll();setScreen('s-auth');}
   });
 });
 
-function updateNav(){ document.getElementById('nav-avatar').textContent=myName.charAt(0).toUpperCase(); document.getElementById('nav-name').textContent=myName; document.getElementById('nav-email').textContent=cu&&cu.email||''; }
+function updateNav(){
+  var avatarEl=document.getElementById('nav-avatar');
+  if(cu&&cu.photoURL){
+    avatarEl.innerHTML='<img src="'+cu.photoURL+'" style="width:34px;height:34px;border-radius:50%;object-fit:cover;display:block">';
+    avatarEl.textContent='';
+  }else{
+    avatarEl.innerHTML='';
+    avatarEl.textContent=myName.charAt(0).toUpperCase();
+  }
+  document.getElementById('nav-name').textContent=myName;
+  document.getElementById('nav-email').textContent=cu&&cu.email||'';
+}
 
 function showRooms(){
-  updateNav(); setScreen('s-rooms'); stopAll();
-  loadPublicRooms(); loadRanking(); loadStoreRanking();
-  pollTmr = setInterval(function(){ loadPublicRooms(); loadOnlineUsers(); }, 4000);
-  rankTmr = setInterval(function(){ loadRanking(); loadStoreRanking(); }, 10000);
-  var now = new Date();
-  document.getElementById('rank-month').textContent = now.getFullYear()+'년 '+(now.getMonth()+1)+'월';
-  setTimeout(function(){ try{ startPresence(); }catch(e){ console.warn('presence err',e); } }, 500);
+  updateNav();setScreen('s-rooms');stopAll();
+  loadPublicRooms();loadRanking();loadStoreRanking();
+  pollTmr=setInterval(function(){loadPublicRooms();loadOnlineUsers();},4000);
+  rankTmr=setInterval(function(){loadRanking();loadStoreRanking();},10000);
+  var now=new Date();
+  document.getElementById('rank-month').textContent=now.getFullYear()+'년 '+(now.getMonth()+1)+'월';
+  setTimeout(function(){try{startPresence();}catch(e){console.warn('presence err',e);}},500);
 }
 
 function switchTab(tab){
   currentTab=tab;
   ['public','private','memo','roulette'].forEach(function(t){
-    document.getElementById('tab-'+t+'-content').style.display = t===tab?'block':'none';
-    var btnId = t==='public'?'tab-pub':t==='private'?'tab-priv':t==='memo'?'tab-memo':'tab-roulette';
-    var btn = document.getElementById(btnId);
-    if(btn){ btn.style.background=t===tab?'#4f6ef7':'transparent'; btn.style.color=t===tab?'#fff':'#4f6ef7'; }
+    document.getElementById('tab-'+t+'-content').style.display=t===tab?'block':'none';
+    var btnId=t==='public'?'tab-pub':t==='private'?'tab-priv':t==='memo'?'tab-memo':'tab-roulette';
+    var btn=document.getElementById(btnId);
+    if(btn){btn.style.background=t===tab?'#4f6ef7':'transparent';btn.style.color=t===tab?'#fff':'#4f6ef7';}
   });
-  if(tab==='memo') loadMemos();
-  if(tab==='roulette') rDrawWheel();
+  if(tab==='memo')loadMemos();
+  if(tab==='roulette')rDrawWheel();
 }
 
 function loadPublicRooms(){
-  var list = document.getElementById('public-rooms-list');
+  var list=document.getElementById('public-rooms-list');
   db.ref('rooms').get().then(function(snap){
-    if(!snap.exists()){ list.innerHTML='<div class="empty-rooms"><div>🍜</div>방이 없습니다</div>'; return; }
-    var pub = Object.entries(snap.val()).filter(function(e){ return e[1].type==='public'; });
-    if(!pub.length){ list.innerHTML='<div class="empty-rooms"><div>🍜</div>공개된 방이 없습니다</div>'; return; }
-    list.innerHTML = pub.map(function(e){
-      var code=e[0], r=e[1];
-      var cnt = r.orders ? Object.values(r.orders).filter(function(o){return !o.canceled;}).length : 0;
-      var c = getRoomColor(r.color);
+    if(!snap.exists()){list.innerHTML='<div class="empty-rooms"><div>🍜</div>방이 없습니다</div>';return;}
+    var pub=Object.entries(snap.val()).filter(function(e){return e[1].type==='public';});
+    if(!pub.length){list.innerHTML='<div class="empty-rooms"><div>🍜</div>공개된 방이 없습니다</div>';return;}
+    list.innerHTML=pub.map(function(e){
+      var code=e[0],r=e[1];
+      var cnt=r.orders?Object.values(r.orders).filter(function(o){return !o.canceled;}).length:0;
+      var c=getRoomColor(r.color);
       return '<div class="room-card" data-code="'+code+'" style="border-left:4px solid '+c.border+';background:'+c.bg+'">'
         +'<div style="font-size:26px">'+(r.done?'✅':'🍜')+'</div>'
         +'<div class="room-info"><div class="room-title">'+esc(r.title)+'</div><div class="room-host">주최자: '+esc(r.host)+'</div>'
@@ -784,18 +772,18 @@ function loadPublicRooms(){
         +(r.ownerUid===cu.uid?'<span class="mine-badge">👑 내 방</span>':'')
         +'</div></div></div>';
     }).join('');
-    list.querySelectorAll('.room-card').forEach(function(el){ el.onclick=function(){ enterRoom(this.dataset.code); }; });
-  }).catch(function(e){ list.innerHTML='<div class="empty-rooms">⚠️ '+esc(e.message)+'</div>'; });
+    list.querySelectorAll('.room-card').forEach(function(el){el.onclick=function(){enterRoom(this.dataset.code);};});
+  }).catch(function(e){list.innerHTML='<div class="empty-rooms">⚠️ '+esc(e.message)+'</div>';});
 }
 
 function loadRanking(){
   db.ref('ranking/'+getYM()).get().then(function(snap){
-    var list = document.getElementById('rank-list');
-    if(!snap.exists()){ list.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:14px">아직 없어요</div>'; return; }
-    var entries = Object.entries(snap.val());
-    entries.sort(function(a,b){ return currentRankTab==='amount'?(b[1].totalAmount||0)-(a[1].totalAmount||0):(b[1].orderCount||0)-(a[1].orderCount||0); });
-    list.innerHTML = entries.slice(0,10).map(function(e,i){
-      var d=e[1], nc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
+    var list=document.getElementById('rank-list');
+    if(!snap.exists()){list.innerHTML='<div style="color:#aaa;text-align:center;padding:20px;font-size:14px">아직 없어요</div>';return;}
+    var entries=Object.entries(snap.val());
+    entries.sort(function(a,b){return currentRankTab==='amount'?(b[1].totalAmount||0)-(a[1].totalAmount||0):(b[1].orderCount||0)-(a[1].orderCount||0);});
+    list.innerHTML=entries.slice(0,10).map(function(e,i){
+      var d=e[1],nc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
       var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
       var val=currentRankTab==='amount'?(d.totalAmount||0).toLocaleString()+'원':(d.orderCount||0)+'번';
       return '<div class="rank-item"><div class="rank-num '+nc+'">'+(medal||(i+1))+'</div><div style="flex:1;font-weight:600;font-size:14px;color:#1a1a2e">'+esc(d.name||'?')+'</div><div class="rank-badge">'+val+'</div></div>';
@@ -805,12 +793,12 @@ function loadRanking(){
 
 function loadStoreRanking(){
   db.ref('storeRanking/'+getYM()).get().then(function(snap){
-    var el = document.getElementById('store-rank-list');
-    if(!snap.exists()){ el.innerHTML='<div style="color:#aaa;text-align:center;padding:16px;font-size:14px">아직 완료된 배달이 없어요</div>'; return; }
-    var entries = Object.entries(snap.val()).sort(function(a,b){ return (b[1].count||0)-(a[1].count||0); });
-    var max = entries[0][1].count||1;
-    el.innerHTML = entries.map(function(e,i){
-      var s=e[1], nc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
+    var el=document.getElementById('store-rank-list');
+    if(!snap.exists()){el.innerHTML='<div style="color:#aaa;text-align:center;padding:16px;font-size:14px">아직 완료된 배달이 없어요</div>';return;}
+    var entries=Object.entries(snap.val()).sort(function(a,b){return (b[1].count||0)-(a[1].count||0);});
+    var max=entries[0][1].count||1;
+    el.innerHTML=entries.map(function(e,i){
+      var s=e[1],nc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n';
       var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
       var bw=Math.round((s.count||0)/max*100);
       return '<div class="rank-item" style="flex-direction:column;align-items:flex-start;gap:4px"><div style="display:flex;align-items:center;gap:8px;width:100%"><div class="rank-num '+nc+'">'+(medal||(i+1))+'</div><div style="flex:1;font-weight:600;font-size:13px">'+esc(s.name||e[0])+'</div><div class="rank-badge">'+(s.count||0)+'회</div></div><div style="width:100%;height:4px;background:#f0f0f0;border-radius:4px;margin-left:36px"><div style="width:'+bw+'%;height:100%;background:#4f6ef7;border-radius:4px"></div></div></div>';
@@ -818,8 +806,8 @@ function loadStoreRanking(){
   });
 }
 
-function showCreateModal(){ document.getElementById('create-modal').style.display='flex'; document.getElementById('c-title-select').value=''; document.getElementById('c-title').value=''; document.getElementById('c-title').style.display='none'; document.getElementById('c-bank').value=''; selRoomType('public'); }
-function selRoomType(t){ selType_=t; document.getElementById('type-public').classList.toggle('sel',t==='public'); document.getElementById('type-private').classList.toggle('sel',t==='private'); }
+function showCreateModal(){document.getElementById('create-modal').style.display='flex';document.getElementById('c-title-select').value='';document.getElementById('c-title').value='';document.getElementById('c-title').style.display='none';document.getElementById('c-bank').value='';selRoomType('public');}
+function selRoomType(t){selType_=t;document.getElementById('type-public').classList.toggle('sel',t==='public');document.getElementById('type-private').classList.toggle('sel',t==='private');}
 
 function createRoom(){
   var sel=document.getElementById('c-title-select').value;
@@ -827,19 +815,19 @@ function createRoom(){
   var bank=document.getElementById('c-bank').value.trim();
   var colorEl=document.querySelector('input[name="room-color"]:checked');
   var color=colorEl?colorEl.value:'yellow';
-  if(!title) return alert('가게명을 입력해주세요.');
+  if(!title)return alert('가게명을 입력해주세요.');
   var code=genCode();
   document.getElementById('create-modal').style.display='none';
-  db.ref('rooms/'+code).set({title:title,host:myName,ownerUid:cu.uid,open:false,done:false,images:[],orders:{},chat:{},type:selType_,bank:bank||'',color:color,createdAt:Date.now()}).then(function(){ enterRoom(code); });
+  db.ref('rooms/'+code).set({title:title,host:myName,ownerUid:cu.uid,open:false,done:false,images:[],orders:{},chat:{},type:selType_,bank:bank||'',color:color,createdAt:Date.now()}).then(function(){enterRoom(code);});
 }
 
-function enterRoom(code){ db.ref('rooms/'+code).get().then(function(snap){ if(!snap.exists()) return alert('방을 찾을 수 없습니다.'); startRoom(code, snap.val().ownerUid===cu.uid?'host':'participant', snap.val().type||'public'); }); }
-function joinPrivate(){ var code=document.getElementById('priv-code').value.trim().toUpperCase(); if(!code) return alert('방 코드를 입력해주세요.'); enterRoom(code); }
-function goBack(){ myCode=''; myRole=''; roomType=''; clearSession(); stopAll(); showRooms(); }
+function enterRoom(code){db.ref('rooms/'+code).get().then(function(snap){if(!snap.exists())return alert('방을 찾을 수 없습니다.');startRoom(code,snap.val().ownerUid===cu.uid?'host':'participant',snap.val().type||'public');});}
+function joinPrivate(){var code=document.getElementById('priv-code').value.trim().toUpperCase();if(!code)return alert('방 코드를 입력해주세요.');enterRoom(code);}
+function goBack(){myCode='';myRole='';roomType='';clearSession();stopAll();showRooms();}
 
 function startRoom(code,role,type){
-  stopAll(); myCode=code; myRole=role; roomType=type; lastChatLen='';
-  saveSession(); setScreen('screen-room');
+  stopAll();myCode=code;myRole=role;roomType=type;lastChatLen='';
+  saveSession();setScreen('screen-room');
   document.getElementById('chat-messages').innerHTML='';
   document.getElementById('r-role-badge').textContent=role==='host'?'👑 주최자':'🙋 참여자';
   document.getElementById('r-role-badge').style.cssText=role==='host'?'background:#fff3cd;color:#856404':'background:#e8edff;color:#4f6ef7';
@@ -847,48 +835,48 @@ function startRoom(code,role,type){
   document.getElementById('host-controls').style.display=role==='host'?'block':'none';
   document.getElementById('r-codebox').style.display=(role==='host'&&type==='private')?'block':'none';
   document.getElementById('disp-code').textContent=code;
-  roomLis = db.ref('rooms/'+code).on('value', function(s){ if(!s.exists()){goBack();return;} renderRoom(s.val()); });
-  chatLis = db.ref('rooms/'+code+'/chat').on('value', function(s){ renderChat(s.val()); });
+  roomLis=db.ref('rooms/'+code).on('value',function(s){if(!s.exists()){goBack();return;}renderRoom(s.val());});
+  chatLis=db.ref('rooms/'+code+'/chat').on('value',function(s){renderChat(s.val());});
 }
 
 function renderRoom(room){
   document.getElementById('r-title').textContent=room.title;
   document.getElementById('r-sub').textContent='주최자: '+room.host+' | '+(roomType==='private'?'🔒 비밀 방':'🌐 자유 참여');
-  var badge=document.getElementById('r-status-badge'), doneBtn=document.getElementById('done-btn');
+  var badge=document.getElementById('r-status-badge'),doneBtn=document.getElementById('done-btn');
   if(room.done){
-    document.getElementById('done-banner').style.display='block'; badge.textContent='🎉 완료'; badge.className='badge-open';
+    document.getElementById('done-banner').style.display='block';badge.textContent='🎉 완료';badge.className='badge-open';
     document.getElementById('settlement-section').style.display='block';
     var ords=room.orders?Object.values(room.orders).filter(function(o){return !o.canceled;}):[]; renderSettlement(ords,room.bank);
-    document.getElementById('r-order-section').style.display='none'; document.getElementById('r-closed-msg').style.display='none';
-    if(doneBtn){ doneBtn.style.display='none'; document.getElementById('open-btn').style.display='none'; document.getElementById('close-btn').style.display='none'; }
-  } else {
-    document.getElementById('done-banner').style.display='none'; document.getElementById('settlement-section').style.display='none';
-    badge.textContent=room.open?'✅ 주문 중':'🔒 마감'; badge.className=room.open?'badge-open':'badge-closed';
+    document.getElementById('r-order-section').style.display='none';document.getElementById('r-closed-msg').style.display='none';
+    if(doneBtn){doneBtn.style.display='none';document.getElementById('open-btn').style.display='none';document.getElementById('close-btn').style.display='none';}
+  }else{
+    document.getElementById('done-banner').style.display='none';document.getElementById('settlement-section').style.display='none';
+    badge.textContent=room.open?'✅ 주문 중':'🔒 마감';badge.className=room.open?'badge-open':'badge-closed';
     if(doneBtn){
-      doneBtn.style.display='block'; document.getElementById('open-btn').style.display=''; document.getElementById('close-btn').style.display='';
+      doneBtn.style.display='block';document.getElementById('open-btn').style.display='';document.getElementById('close-btn').style.display='';
       var allOrds=room.orders?Object.values(room.orders).filter(function(o){return !o.canceled;}):[];
-      var allPaid=allOrds.length>0 && allOrds.every(function(o){return o.paid===true;});
-      doneBtn.disabled=!allPaid; doneBtn.style.opacity=allPaid?'1':'0.4'; doneBtn.style.cursor=allPaid?'pointer':'not-allowed';
+      var allPaid=allOrds.length>0&&allOrds.every(function(o){return o.paid===true;});
+      doneBtn.disabled=!allPaid;doneBtn.style.opacity=allPaid?'1':'0.4';doneBtn.style.cursor=allPaid?'pointer':'not-allowed';
       doneBtn.textContent=allPaid?'🎉 배달 완료!':'🔒 전원 입금 후 완료 가능';
     }
   }
   if(room.bank){
-    if(myRole==='host'){ document.getElementById('h-bank-input').value=room.bank; document.getElementById('h-bank-val').textContent=room.bank; document.getElementById('h-bank-preview').style.display='block'; }
-    else{ document.getElementById('p-account-box').style.display='block'; document.getElementById('p-bank-val').textContent=room.bank; }
-  } else document.getElementById('p-account-box').style.display='none';
+    if(myRole==='host'){document.getElementById('h-bank-input').value=room.bank;document.getElementById('h-bank-val').textContent=room.bank;document.getElementById('h-bank-preview').style.display='block';}
+    else{document.getElementById('p-account-box').style.display='block';document.getElementById('p-bank-val').textContent=room.bank;}
+  }else document.getElementById('p-account-box').style.display='none';
   document.getElementById('img-section').style.display='block';
-  if(myRole==='host'){ renderHostImages(room.images||[]); document.getElementById('ai-menu-section').style.display='block'; if(room.menuList) renderSavedMenus(room.menuList); }
+  if(myRole==='host'){renderHostImages(room.images||[]);document.getElementById('ai-menu-section').style.display='block';if(room.menuList)renderSavedMenus(room.menuList);}
   images=room.images||[];
-  if(!images.length){ document.getElementById('p-no-img').style.display='block'; document.getElementById('p-img-viewer').style.display='none'; }
-  else{ document.getElementById('p-no-img').style.display='none'; document.getElementById('p-img-viewer').style.display='block'; if(imgIdx>=images.length) imgIdx=0; updateImgViewer(); }
+  if(!images.length){document.getElementById('p-no-img').style.display='block';document.getElementById('p-img-viewer').style.display='none';}
+  else{document.getElementById('p-no-img').style.display='none';document.getElementById('p-img-viewer').style.display='block';if(imgIdx>=images.length)imgIdx=0;updateImgViewer();}
   renderMenuHint(room.menuList||'');
   if(!room.done){
     document.getElementById('r-closed-msg').style.display=room.open?'none':'block';
     document.getElementById('r-order-section').style.display=room.open?'block':'none';
     if(room.open){
-      var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_'); var myO=room.orders&&room.orders[key];
-      if(myO&&!myO.canceled){ document.getElementById('my-order-form').style.display='none'; document.getElementById('my-order-done').style.display='block'; document.getElementById('my-order-display').textContent=myO.order+(myO.price!=null?'\n💰 '+Number(myO.price).toLocaleString()+'원':'')+(myO.memo?'\n💬 '+myO.memo:''); }
-      else{ document.getElementById('my-order-form').style.display='block'; document.getElementById('my-order-done').style.display='none'; }
+      var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');var myO=room.orders&&room.orders[key];
+      if(myO&&!myO.canceled){document.getElementById('my-order-form').style.display='none';document.getElementById('my-order-done').style.display='block';document.getElementById('my-order-display').textContent=myO.order+(myO.price!=null?'\n💰 '+Number(myO.price).toLocaleString()+'원':'')+(myO.memo?'\n💬 '+myO.memo:'');}
+      else{document.getElementById('my-order-form').style.display='block';document.getElementById('my-order-done').style.display='none';}
       var orders2=room.orders?Object.values(room.orders).filter(function(o){return !o.canceled;}):[]; renderOrders(orders2,room);
     }
   }
@@ -896,38 +884,38 @@ function renderRoom(room){
 
 function renderOrders(orders,room){
   var ml=document.getElementById('member-list');
-  ml.innerHTML=orders.map(function(o){ return '<div class="member-chip"><div class="av">'+esc((o.name||'?').charAt(0).toUpperCase())+'</div><span>'+esc(o.name)+'</span></div>'; }).join('');
+  ml.innerHTML=orders.map(function(o){return '<div class="member-chip"><div class="av">'+esc((o.name||'?').charAt(0).toUpperCase())+'</div><span>'+esc(o.name)+'</span></div>';}).join('');
   document.getElementById('order-cnt').textContent=orders.length+'명';
   var w=document.getElementById('orders-wrap');
-  if(!orders.length){ w.innerHTML='<div style="color:#aaa;text-align:center;padding:16px">아직 주문이 없습니다</div>'; return; }
+  if(!orders.length){w.innerHTML='<div style="color:#aaa;text-align:center;padding:16px">아직 주문이 없습니다</div>';return;}
   var okeys={};
-  if(room.orders) Object.entries(room.orders).forEach(function(e){ if(!e[1].canceled) okeys[e[1].name]=e[0]; });
+  if(room.orders)Object.entries(room.orders).forEach(function(e){if(!e[1].canceled)okeys[e[1].name]=e[0];});
   w.innerHTML=orders.map(function(o){
-    var isMe=o.name===myName, ok=okeys[o.name]||'', isPaid=o.paid===true, canPay=isMe||myRole==='host';
+    var isMe=o.name===myName,ok=okeys[o.name]||'',isPaid=o.paid===true,canPay=isMe||myRole==='host';
     var priceHtml=o.price!=null?'<div style="font-size:13px;color:#4f6ef7;font-weight:700;margin-top:4px">💰 '+Number(o.price).toLocaleString()+'원</div>':myRole==='host'?'<div style="display:flex;align-items:center;gap:8px;margin-top:6px"><input type="number" id="pi-'+ok+'" placeholder="가격 입력" min="0" style="width:110px;padding:6px 10px;font-size:13px;border:1.5px solid #dde1f0;border-radius:8px"><button onclick="savePriceByKey(\''+ok+'\')" style="padding:6px 12px;border:none;border-radius:8px;background:#4f6ef7;color:#fff;font-size:12px;font-weight:600;cursor:pointer">저장</button></div>':'<div style="font-size:12px;color:#aaa;margin-top:4px">가격 미입력</div>';
     var paidHtml=canPay?'<button onclick="togglePaid(\''+ok+'\','+isPaid+')" style="margin-top:6px;padding:5px 12px;border:none;border-radius:8px;background:'+(isPaid?'#28a745':'#e0e0e0')+';color:'+(isPaid?'#fff':'#555')+';font-size:12px;font-weight:700;cursor:pointer">'+(isPaid?'✅ 입금완료':'💸 입금확인')+'</button>':(isPaid?'<div style="margin-top:5px;font-size:12px;color:#28a745;font-weight:700">✅ 입금완료</div>':'<div style="margin-top:5px;font-size:12px;color:#aaa">💸 입금 대기중</div>');
     return '<div class="order-item" style="'+(isMe?'border-color:#4f6ef7;':'')+(isPaid?'background:#f0fff4;border-color:#28a745;':'')+'">'+'<div class="order-name">'+(isMe?'⭐':'🙋')+' '+esc(o.name)+(isMe?' <span style="font-size:11px;color:#4f6ef7">(나)</span>':'')+'</div>'+'<div class="order-menu">'+esc(o.order)+'</div>'+priceHtml+paidHtml+(o.memo?'<div class="order-memo">💬 '+esc(o.memo)+'</div>':'')+'</div>';
   }).join('');
-  var priced=orders.filter(function(o){return o.price!=null;}); var paidCnt=orders.filter(function(o){return o.paid===true;}).length; var paidAll=orders.length>0&&orders.every(function(o){return o.paid===true;});
-  if(priced.length){ var total=priced.reduce(function(s,o){return s+Number(o.price);},0); w.innerHTML+='<div style="margin-top:10px;padding:12px 16px;background:#f0f4ff;border-radius:10px;font-weight:700;color:#4f6ef7;font-size:15px">💰 합계: '+total.toLocaleString()+'원 <span style="font-weight:400;font-size:13px;color:#888">('+priced.length+'/'+orders.length+'명)</span></div>'; }
+  var priced=orders.filter(function(o){return o.price!=null;});var paidCnt=orders.filter(function(o){return o.paid===true;}).length;var paidAll=orders.length>0&&orders.every(function(o){return o.paid===true;});
+  if(priced.length){var total=priced.reduce(function(s,o){return s+Number(o.price);},0);w.innerHTML+='<div style="margin-top:10px;padding:12px 16px;background:#f0f4ff;border-radius:10px;font-weight:700;color:#4f6ef7;font-size:15px">💰 합계: '+total.toLocaleString()+'원 <span style="font-weight:400;font-size:13px;color:#888">('+priced.length+'/'+orders.length+'명)</span></div>';}
   w.innerHTML+='<div style="margin-top:8px;padding:10px 16px;background:'+(paidAll?'#f0fff4':'#fff8e1')+';border-radius:10px;font-size:14px;font-weight:600;color:'+(paidAll?'#28a745':'#f9a825')+'">💳 입금 현황: '+paidCnt+'/'+orders.length+'명 '+(paidAll?'✅ 전원 완료!':'')+'</div>';
 }
 
-function togglePaid(ok,isPaid){ db.ref('rooms/'+myCode+'/orders/'+ok).update({paid:!isPaid}); }
-function savePriceByKey(ok){ var inp=document.getElementById('pi-'+ok); if(!inp) return; var val=parseInt(inp.value); if(isNaN(val)||val<0) return alert('올바른 가격 입력'); db.ref('rooms/'+myCode+'/orders/'+ok).update({price:val}); }
+function togglePaid(ok,isPaid){db.ref('rooms/'+myCode+'/orders/'+ok).update({paid:!isPaid});}
+function savePriceByKey(ok){var inp=document.getElementById('pi-'+ok);if(!inp)return;var val=parseInt(inp.value);if(isNaN(val)||val<0)return alert('올바른 가격 입력');db.ref('rooms/'+myCode+'/orders/'+ok).update({price:val});}
 
 function renderSettlement(orders,bank){
   var total=orders.reduce(function(s,o){return s+(o.price||0);},0);
-  document.getElementById('settlement-list').innerHTML=orders.map(function(o){ return '<div class="settlement-item"><div><div style="font-weight:700;font-size:14px">'+esc(o.name)+'</div><div style="font-size:13px;color:#555;margin-top:2px">'+esc(o.order)+'</div></div><div style="font-weight:700;color:#4f6ef7">'+(o.price!=null?Number(o.price).toLocaleString()+'원':'미입력')+'</div></div>'; }).join('');
+  document.getElementById('settlement-list').innerHTML=orders.map(function(o){return '<div class="settlement-item"><div><div style="font-weight:700;font-size:14px">'+esc(o.name)+'</div><div style="font-size:13px;color:#555;margin-top:2px">'+esc(o.order)+'</div></div><div style="font-weight:700;color:#4f6ef7">'+(o.price!=null?Number(o.price).toLocaleString()+'원':'미입력')+'</div></div>';}).join('');
   document.getElementById('settlement-total').innerHTML='💰 총 합계: <strong>'+total.toLocaleString()+'원</strong>'+(bank?' | 입금: '+esc(bank):'');
 }
 
-function onDoneClick(){ var btn=document.getElementById('done-btn'); if(btn&&btn.disabled) return; if(window.confirm('배달이 완료되었습니까?')) completeDelivery(); }
+function onDoneClick(){var btn=document.getElementById('done-btn');if(btn&&btn.disabled)return;if(window.confirm('배달이 완료되었습니까?'))completeDelivery();}
 function completeDelivery(){
   db.ref('rooms/'+myCode).get().then(function(snap){
-    if(!snap.exists()) return; var room=snap.val();
+    if(!snap.exists())return;var room=snap.val();
     var orders=room.orders?Object.values(room.orders).filter(function(o){return !o.canceled;}):[]; if(!orders.length){alert('주문이 없습니다.');return;}
-    var ym=getYM(), updates={};
+    var ym=getYM(),updates={};
     var promises=orders.map(function(o){
       var uid=Object.keys(room.orders).find(function(k){return room.orders[k]===o;})||o.name;
       var rk='ranking/'+ym+'/'+uid.replace(/[^a-zA-Z0-9가-힣]/g,'_');
@@ -937,39 +925,37 @@ function completeDelivery(){
       });
     });
     Promise.all(promises).then(function(){
-      var sk=room.title.replace(/[^a-zA-Z0-9가-힣]/g,'_'); var sr='storeRanking/'+ym+'/'+sk;
+      var sk=room.title.replace(/[^a-zA-Z0-9가-힣]/g,'_');var sr='storeRanking/'+ym+'/'+sk;
       db.ref(sr).get().then(function(ss){
         var sc=ss.exists()?ss.val():{name:room.title,count:0};
         updates[sr]={name:room.title,count:(sc.count||0)+1};
-        updates['rooms/'+myCode+'/done']=true; updates['rooms/'+myCode+'/open']=false; updates['rooms/'+myCode+'/completedAt']=Date.now();
-        db.ref().update(updates).then(function(){ alert('🎉 배달 완료! 랭킹에 등록되었습니다.'); });
+        updates['rooms/'+myCode+'/done']=true;updates['rooms/'+myCode+'/open']=false;updates['rooms/'+myCode+'/completedAt']=Date.now();
+        db.ref().update(updates).then(function(){alert('🎉 배달 완료! 랭킹에 등록되었습니다.');});
       });
     });
   });
 }
 
-function renderMenuHint(text){ var hint=document.getElementById('menu-hint'),el=document.getElementById('menu-hint-items'); if(!text||!text.trim()){hint.style.display='none';return;} var items=text.split('\n').filter(function(l){return l.trim();}); if(!items.length){hint.style.display='none';return;} hint.style.display='block'; el.innerHTML=''; items.forEach(function(item){ var name=item.split('-')[0].trim(),price=item.includes('-')?item.split('-').slice(1).join('-').trim():''; var btn=document.createElement('button'); btn.textContent=name+(price?' ('+price+')':''); btn.style.cssText='padding:6px 12px;border:1.5px solid #c4b5fd;border-radius:20px;background:#fff;color:#7c3aed;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:4px'; btn.onclick=function(){ var ta=document.getElementById('r-order-text'); ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+name+' 1개'; ta.focus(); }; el.appendChild(btn); }); }
-function renderSavedMenus(text){ if(!text) return; var items=text.split('\n').filter(function(l){return l.trim();}); document.getElementById('saved-menu-list').style.display='block'; document.getElementById('saved-menu-items').innerHTML=items.map(function(item){ return '<div style="padding:7px 12px;background:#f8faff;border-radius:9px;margin-bottom:5px;font-size:14px">'+esc(item)+'</div>'; }).join(''); }
+function renderMenuHint(text){var hint=document.getElementById('menu-hint'),el=document.getElementById('menu-hint-items');if(!text||!text.trim()){hint.style.display='none';return;}var items=text.split('\n').filter(function(l){return l.trim();});if(!items.length){hint.style.display='none';return;}hint.style.display='block';el.innerHTML='';items.forEach(function(item){var name=item.split('-')[0].trim(),price=item.includes('-')?item.split('-').slice(1).join('-').trim():'';var btn=document.createElement('button');btn.textContent=name+(price?' ('+price+')':'');btn.style.cssText='padding:6px 12px;border:1.5px solid #c4b5fd;border-radius:20px;background:#fff;color:#7c3aed;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:4px';btn.onclick=function(){var ta=document.getElementById('r-order-text');ta.value=(ta.value.trim()?ta.value.trim()+'\n':'')+name+' 1개';ta.focus();};el.appendChild(btn);});}
+function renderSavedMenus(text){if(!text)return;var items=text.split('\n').filter(function(l){return l.trim();});document.getElementById('saved-menu-list').style.display='block';document.getElementById('saved-menu-items').innerHTML=items.map(function(item){return '<div style="padding:7px 12px;background:#f8faff;border-radius:9px;margin-bottom:5px;font-size:14px">'+esc(item)+'</div>';}).join('');}
 
-// ── 채팅 ──
 function renderChat(chatObj){
   var msgs=chatObj?Object.entries(chatObj).sort(function(a,b){return a[1].ts-b[1].ts;}):[]; 
   var newHash=JSON.stringify(msgs.map(function(e){return [e[0],e[1].msg,e[1].reactions];}));
-  if(newHash===lastChatLen) return;
+  if(newHash===lastChatLen)return;
   lastChatLen=newHash;
   var el=document.getElementById('chat-messages');
   var atBot=el.scrollHeight-el.scrollTop-el.clientHeight<80;
-
   db.ref('customEmojis').get().then(function(cs){
     var customMap=cs.exists()?cs.val():{};
     el.innerHTML=msgs.map(function(entry){
-      var key=entry[0], m=entry[1], isMe=m.name===myName;
+      var key=entry[0],m=entry[1],isMe=m.name===myName;
       var reactHtml='';
       if(m.reactions){
         Object.entries(m.reactions).forEach(function(re){
-          var emojiKey=re[0], users=re[1]; if(!users) return;
-          var userVals=Object.values(users), cnt=userVals.length; if(!cnt) return;
-          var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_'), isMine=!!users[uid];
+          var emojiKey=re[0],users=re[1];if(!users)return;
+          var userVals=Object.values(users),cnt=userVals.length;if(!cnt)return;
+          var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_'),isMine=!!users[uid];
           var isCustom=emojiKey.startsWith(':')&&emojiKey.endsWith(':');
           var cname=isCustom?emojiKey.slice(1,-1):'';
           var displayHtml=isCustom?'<img src="'+(customMap[cname]?esc(customMap[cname].url):'')+'" style="width:16px;height:16px;object-fit:contain;vertical-align:middle">':esc(emojiKey);
@@ -987,9 +973,9 @@ function renderChat(chatObj){
         +(reactHtml?'<div class="chat-reactions" style="'+(isMe?'justify-content:flex-end':'')+'">'+reactHtml+'</div>':'')
         +'</div>';
     }).join('');
-    el.querySelectorAll('.chat-reaction-chip').forEach(function(chip){ chip.onclick=function(e){ e.stopPropagation(); toggleChatReaction(this.dataset.msgkey,this.dataset.emoji); }; });
-    el.querySelectorAll('.chat-add-reaction').forEach(function(btn){ btn.onclick=function(e){ e.stopPropagation(); openChatEmojiPicker(this.dataset.msgkey,this); }; });
-    if(atBot) el.scrollTop=el.scrollHeight;
+    el.querySelectorAll('.chat-reaction-chip').forEach(function(chip){chip.onclick=function(e){e.stopPropagation();toggleChatReaction(this.dataset.msgkey,this.dataset.emoji);};});
+    el.querySelectorAll('.chat-add-reaction').forEach(function(btn){btn.onclick=function(e){e.stopPropagation();openChatEmojiPicker(this.dataset.msgkey,this);};});
+    if(atBot)el.scrollTop=el.scrollHeight;
   }).catch(function(){});
 }
 
@@ -1000,113 +986,109 @@ function openChatEmojiPicker(msgKey,btnEl){
   var cusGrid=document.getElementById('chat-emoji-grid-custom');
   var tabDef=document.getElementById('cep-tab-def');
   var tabCus=document.getElementById('cep-tab-custom');
-  defGrid.style.display='grid'; cusGrid.style.display='none';
-  tabDef.style.background='#4f6ef7'; tabDef.style.color='#fff'; tabCus.style.background='transparent'; tabCus.style.color='#4f6ef7';
-  defGrid.innerHTML=CHAT_EMOJIS.map(function(em){ return '<button class="chat-emoji-btn">'+em+'</button>'; }).join('');
-  defGrid.querySelectorAll('.chat-emoji-btn').forEach(function(b,i){ b.onclick=function(){ toggleChatReaction(curChatMsgKey,CHAT_EMOJIS[i]); picker.style.display='none'; }; });
-  tabDef.onclick=function(){ defGrid.style.display='grid'; cusGrid.style.display='none'; tabDef.style.background='#4f6ef7'; tabDef.style.color='#fff'; tabCus.style.background='transparent'; tabCus.style.color='#4f6ef7'; };
+  defGrid.style.display='grid';cusGrid.style.display='none';
+  tabDef.style.background='#4f6ef7';tabDef.style.color='#fff';tabCus.style.background='transparent';tabCus.style.color='#4f6ef7';
+  defGrid.innerHTML=CHAT_EMOJIS.map(function(em){return '<button class="chat-emoji-btn">'+em+'</button>';}).join('');
+  defGrid.querySelectorAll('.chat-emoji-btn').forEach(function(b,i){b.onclick=function(){toggleChatReaction(curChatMsgKey,CHAT_EMOJIS[i]);picker.style.display='none';};});
+  tabDef.onclick=function(){defGrid.style.display='grid';cusGrid.style.display='none';tabDef.style.background='#4f6ef7';tabDef.style.color='#fff';tabCus.style.background='transparent';tabCus.style.color='#4f6ef7';};
   tabCus.onclick=function(){
-    defGrid.style.display='none'; cusGrid.style.display='grid'; tabCus.style.background='#4f6ef7'; tabCus.style.color='#fff'; tabDef.style.background='transparent'; tabDef.style.color='#4f6ef7';
+    defGrid.style.display='none';cusGrid.style.display='grid';tabCus.style.background='#4f6ef7';tabCus.style.color='#fff';tabDef.style.background='transparent';tabDef.style.color='#4f6ef7';
     cusGrid.innerHTML='<div style="color:#aaa;font-size:12px;padding:8px;grid-column:span 7">불러오는 중...</div>';
     db.ref('customEmojis').get().then(function(snap){
       cusGrid.innerHTML='';
-      if(!snap.exists()){ cusGrid.innerHTML='<div style="color:#aaa;font-size:12px;padding:8px;grid-column:span 7">메모판에서 먼저 추가하세요</div>'; return; }
-      Object.entries(snap.val()).forEach(function(e){ var btn=document.createElement('button'); btn.className='chat-emoji-btn'; btn.innerHTML='<img src="'+esc(e[1].url)+'" style="width:22px;height:22px;object-fit:contain">'; btn.onclick=function(){ toggleChatReaction(curChatMsgKey,':'+e[0]+':'); picker.style.display='none'; }; cusGrid.appendChild(btn); });
+      if(!snap.exists()){cusGrid.innerHTML='<div style="color:#aaa;font-size:12px;padding:8px;grid-column:span 7">메모판에서 먼저 추가하세요</div>';return;}
+      Object.entries(snap.val()).forEach(function(e){var btn=document.createElement('button');btn.className='chat-emoji-btn';btn.innerHTML='<img src="'+esc(e[1].url)+'" style="width:22px;height:22px;object-fit:contain">';btn.onclick=function(){toggleChatReaction(curChatMsgKey,':'+e[0]+':');picker.style.display='none';};cusGrid.appendChild(btn);});
     });
   };
   picker.style.display='block';
   var r=btnEl.getBoundingClientRect();
-  var top=r.top+window.scrollY-190, left=r.left+window.scrollX-110;
-  if(top<60) top=r.bottom+window.scrollY+4;
+  var top=r.top+window.scrollY-190,left=r.left+window.scrollX-110;
+  if(top<60)top=r.bottom+window.scrollY+4;
   left=Math.max(8,Math.min(left,window.innerWidth-260));
-  picker.style.top=top+'px'; picker.style.left=left+'px';
+  picker.style.top=top+'px';picker.style.left=left+'px';
 }
 
 function toggleChatReaction(msgKey,emoji){
   var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
   var path='rooms/'+myCode+'/chat/'+msgKey+'/reactions/'+emoji+'/'+uid;
-  db.ref(path).get().then(function(snap){ if(snap.exists()) db.ref(path).remove(); else db.ref(path).set(myName); });
+  db.ref(path).get().then(function(snap){if(snap.exists())db.ref(path).remove();else db.ref(path).set(myName);});
 }
 
-function sendChat(){ var msg=document.getElementById('chat-input').value.trim(); if(!msg) return; document.getElementById('chat-input').value=''; db.ref('rooms/'+myCode+'/chat').push({name:myName,msg:msg,ts:Date.now()}); }
+function sendChat(){var msg=document.getElementById('chat-input').value.trim();if(!msg)return;document.getElementById('chat-input').value='';db.ref('rooms/'+myCode+'/chat').push({name:myName,msg:msg,ts:Date.now()});}
 
 function submitOrder(){
-  var order=document.getElementById('r-order-text').value.trim(), memo=document.getElementById('r-memo').value.trim(), pv=document.getElementById('r-price').value, price=pv?parseInt(pv):null;
-  if(!order) return alert('메뉴를 입력해주세요.');
-  db.ref('rooms/'+myCode+'/open').get().then(function(s){ if(!s.val()) return alert('주문이 마감되었습니다.'); var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_'); db.ref('rooms/'+myCode+'/orders/'+key).set({name:myName,order:order,memo:memo,price:price,canceled:false}); });
+  var order=document.getElementById('r-order-text').value.trim(),memo=document.getElementById('r-memo').value.trim(),pv=document.getElementById('r-price').value,price=pv?parseInt(pv):null;
+  if(!order)return alert('메뉴를 입력해주세요.');
+  db.ref('rooms/'+myCode+'/open').get().then(function(s){if(!s.val())return alert('주문이 마감되었습니다.');var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');db.ref('rooms/'+myCode+'/orders/'+key).set({name:myName,order:order,memo:memo,price:price,canceled:false});});
 }
-function cancelOrder(){ if(!confirm('주문을 취소하시겠습니까?')) return; var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_'); db.ref('rooms/'+myCode+'/orders/'+key).update({canceled:true}); document.getElementById('r-order-text').value=''; document.getElementById('r-price').value=''; document.getElementById('r-memo').value=''; }
-function deleteRoom(){ db.ref('rooms/'+myCode+'/ownerUid').get().then(function(s){ if(s.val()!==cu.uid){alert('방 주인만 삭제 가능합니다.');return;} if(!confirm('방을 삭제하시겠습니까?')) return; db.ref('rooms/'+myCode).remove().then(function(){ clearSession(); stopAll(); showRooms(); }); }); }
-function saveBank(){ var bank=document.getElementById('h-bank-input').value.trim(); db.ref('rooms/'+myCode).update({bank:bank}).then(function(){ document.getElementById('h-bank-val').textContent=bank; document.getElementById('h-bank-preview').style.display=bank?'block':'none'; alert('저장!'); }); }
+function cancelOrder(){if(!confirm('주문을 취소하시겠습니까?'))return;var key=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');db.ref('rooms/'+myCode+'/orders/'+key).update({canceled:true});document.getElementById('r-order-text').value='';document.getElementById('r-price').value='';document.getElementById('r-memo').value='';}
+function deleteRoom(){db.ref('rooms/'+myCode+'/ownerUid').get().then(function(s){if(s.val()!==cu.uid){alert('방 주인만 삭제 가능합니다.');return;}if(!confirm('방을 삭제하시겠습니까?'))return;db.ref('rooms/'+myCode).remove().then(function(){clearSession();stopAll();showRooms();});});}
+function saveBank(){var bank=document.getElementById('h-bank-input').value.trim();db.ref('rooms/'+myCode).update({bank:bank}).then(function(){document.getElementById('h-bank-val').textContent=bank;document.getElementById('h-bank-preview').style.display=bank?'block':'none';alert('저장!');});}
 
 function analyzeMenus(){
-  if(!images.length) return alert('사진을 먼저 올려주세요.');
-  document.getElementById('ai-loading').style.display='block'; document.getElementById('ai-result').style.display='none'; document.getElementById('ai-btn').disabled=true;
-  var parts=images.map(function(b64){ var m=b64.match(/^data:([^;]+);base64,/); return {inline_data:{mime_type:m?m[1]:'image/jpeg',data:b64.replace(/^data:[^;]+;base64,/,'')}}; });
+  if(!images.length)return alert('사진을 먼저 올려주세요.');
+  document.getElementById('ai-loading').style.display='block';document.getElementById('ai-result').style.display='none';document.getElementById('ai-btn').disabled=true;
+  var parts=images.map(function(b64){var m=b64.match(/^data:([^;]+);base64,/);return {inline_data:{mime_type:m?m[1]:'image/jpeg',data:b64.replace(/^data:[^;]+;base64,/,'')}};});
   parts.push({text:'이 메뉴판 사진을 보고 메뉴 이름과 가격을 목록으로 추출해줘. 형식은 반드시 "메뉴명 - 가격원" 형태로 한 줄에 하나씩만 출력해. 가격 없으면 메뉴명만. 설명 절대 하지마.'});
   fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+GEMINI_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:parts}]})})
-  .then(function(res){ return res.json(); }).then(function(data){ var text=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text||'').trim(); if(!text){alert('인식 실패');return;} document.getElementById('ai-menu-text').value=text; document.getElementById('ai-result').style.display='block'; }).catch(function(e){ alert('오류: '+e.message); }).finally(function(){ document.getElementById('ai-loading').style.display='none'; document.getElementById('ai-btn').disabled=false; });
+  .then(function(res){return res.json();}).then(function(data){var text=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text||'').trim();if(!text){alert('인식 실패');return;}document.getElementById('ai-menu-text').value=text;document.getElementById('ai-result').style.display='block';}).catch(function(e){alert('오류: '+e.message);}).finally(function(){document.getElementById('ai-loading').style.display='none';document.getElementById('ai-btn').disabled=false;});
 }
-function saveAiMenus(){ var t=document.getElementById('ai-menu-text').value.trim(); if(!t) return; db.ref('rooms/'+myCode).update({menuList:t}).then(function(){ renderSavedMenus(t); alert('저장!'); }); }
-function saveManualMenus(){ var t=document.getElementById('ai-menu-text-manual').value.trim(); if(!t) return; db.ref('rooms/'+myCode).update({menuList:t}).then(function(){ renderSavedMenus(t); alert('저장!'); }); }
+function saveAiMenus(){var t=document.getElementById('ai-menu-text').value.trim();if(!t)return;db.ref('rooms/'+myCode).update({menuList:t}).then(function(){renderSavedMenus(t);alert('저장!');});}
+function saveManualMenus(){var t=document.getElementById('ai-menu-text-manual').value.trim();if(!t)return;db.ref('rooms/'+myCode).update({menuList:t}).then(function(){renderSavedMenus(t);alert('저장!');});}
 
-// ── 이미지 ──
-function renderHostImages(imgs){ var grid=document.getElementById('h-img-grid'); grid.innerHTML=(imgs||[]).map(function(s,i){ return '<div class="img-card"><img src="'+s+'" data-idx="'+i+'"><button class="del-btn" data-idx="'+i+'">✕</button></div>'; }).join(''); grid.querySelectorAll('img').forEach(function(el){ el.onclick=function(){ openLightbox(parseInt(this.dataset.idx)); }; }); grid.querySelectorAll('.del-btn').forEach(function(el){ el.onclick=function(){ delImg(parseInt(this.dataset.idx)); }; }); }
-function handleImages(input){ var files=Array.from(input.files); var chain=Promise.resolve(); files.forEach(function(f){ chain=chain.then(function(){ return new Promise(function(resolve){ var reader=new FileReader(); reader.onload=function(e){ db.ref('rooms/'+myCode+'/images').get().then(function(s){ var imgs=s.val()||[]; imgs.push(e.target.result); return db.ref('rooms/'+myCode+'/images').set(imgs); }).then(resolve); }; reader.readAsDataURL(f); }); }); }); chain.then(function(){ input.value=''; }); }
-function delImg(i){ db.ref('rooms/'+myCode+'/images').get().then(function(s){ var imgs=s.val()||[]; imgs.splice(i,1); db.ref('rooms/'+myCode+'/images').set(imgs); }); }
-function prevImg(){ imgIdx=Math.max(0,imgIdx-1); updateImgViewer(); }
-function nextImg(){ imgIdx=Math.min(images.length-1,imgIdx+1); updateImgViewer(); }
-function updateImgViewer(){ var img=document.getElementById('p-main-img'); img.src=images[imgIdx]; img.style.cursor='zoom-in'; document.getElementById('img-counter').textContent=(imgIdx+1)+'/'+images.length; }
+function renderHostImages(imgs){var grid=document.getElementById('h-img-grid');grid.innerHTML=(imgs||[]).map(function(s,i){return '<div class="img-card"><img src="'+s+'" data-idx="'+i+'"><button class="del-btn" data-idx="'+i+'">✕</button></div>';}).join('');grid.querySelectorAll('img').forEach(function(el){el.onclick=function(){openLightbox(parseInt(this.dataset.idx));};});grid.querySelectorAll('.del-btn').forEach(function(el){el.onclick=function(){delImg(parseInt(this.dataset.idx));};});}
+function handleImages(input){var files=Array.from(input.files);var chain=Promise.resolve();files.forEach(function(f){chain=chain.then(function(){return new Promise(function(resolve){var reader=new FileReader();reader.onload=function(e){db.ref('rooms/'+myCode+'/images').get().then(function(s){var imgs=s.val()||[];imgs.push(e.target.result);return db.ref('rooms/'+myCode+'/images').set(imgs);}).then(resolve);};reader.readAsDataURL(f);});});});chain.then(function(){input.value='';});}
+function delImg(i){db.ref('rooms/'+myCode+'/images').get().then(function(s){var imgs=s.val()||[];imgs.splice(i,1);db.ref('rooms/'+myCode+'/images').set(imgs);});}
+function prevImg(){imgIdx=Math.max(0,imgIdx-1);updateImgViewer();}
+function nextImg(){imgIdx=Math.min(images.length-1,imgIdx+1);updateImgViewer();}
+function updateImgViewer(){var img=document.getElementById('p-main-img');img.src=images[imgIdx];img.style.cursor='zoom-in';document.getElementById('img-counter').textContent=(imgIdx+1)+'/'+images.length;}
 
-// ── 라이트박스 ──
 var lb={canvas:null,ctx:null,img:new Image(),scale:1,minScale:1,maxScale:10,ox:0,oy:0,dragging:false,lastX:0,lastY:0,touches:[],lastDist:0};
-function lbInit(){ lb.canvas=document.getElementById('lb-canvas'); lb.ctx=lb.canvas.getContext('2d'); lb.img.onload=function(){ lbFit(); lbDraw(); }; lb.canvas.addEventListener('wheel',function(e){ e.preventDefault(); var r=lb.canvas.getBoundingClientRect(); lbZoomAt(e.deltaY<0?1.12:1/1.12,e.clientX-r.left,e.clientY-r.top); },{passive:false}); lb.canvas.addEventListener('mousedown',function(e){ lb.dragging=true; lb.lastX=e.clientX; lb.lastY=e.clientY; lb.canvas.style.cursor='grabbing'; }); window.addEventListener('mousemove',function(e){ if(!lb.dragging) return; lb.ox+=e.clientX-lb.lastX; lb.oy+=e.clientY-lb.lastY; lb.lastX=e.clientX; lb.lastY=e.clientY; lbDraw(); }); window.addEventListener('mouseup',function(){ lb.dragging=false; lb.canvas.style.cursor='default'; }); lb.canvas.addEventListener('dblclick',function(e){ var r=lb.canvas.getBoundingClientRect(); if(Math.abs(lb.scale-lb.minScale)<0.01) lbZoomAt(2.5,e.clientX-r.left,e.clientY-r.top); else{ lbFit(); lbDraw(); } }); lb.canvas.addEventListener('touchstart',function(e){ lb.touches=Array.from(e.touches); if(lb.touches.length===1){lb.dragging=true;lb.lastX=lb.touches[0].clientX;lb.lastY=lb.touches[0].clientY;} if(lb.touches.length===2) lb.lastDist=Math.hypot(lb.touches[0].clientX-lb.touches[1].clientX,lb.touches[0].clientY-lb.touches[1].clientY); },{passive:true}); lb.canvas.addEventListener('touchmove',function(e){ e.preventDefault(); lb.touches=Array.from(e.touches); if(lb.touches.length===2){ var dist=Math.hypot(lb.touches[0].clientX-lb.touches[1].clientX,lb.touches[0].clientY-lb.touches[1].clientY); var cx=(lb.touches[0].clientX+lb.touches[1].clientX)/2,cy=(lb.touches[0].clientY+lb.touches[1].clientY)/2,r=lb.canvas.getBoundingClientRect(); lbZoomAt(dist/lb.lastDist,cx-r.left,cy-r.top); lb.lastDist=dist; }else if(lb.touches.length===1&&lb.dragging){ lb.ox+=lb.touches[0].clientX-lb.lastX; lb.oy+=lb.touches[0].clientY-lb.lastY; lb.lastX=lb.touches[0].clientX; lb.lastY=lb.touches[0].clientY; lbDraw(); } },{passive:false}); lb.canvas.addEventListener('touchend',function(){ lb.dragging=false; lb.lastDist=0; }); }
-function lbResize(){ lb.canvas.width=window.innerWidth; lb.canvas.height=window.innerHeight; }
-function lbFit(){ lbResize(); var cw=lb.canvas.width,ch=lb.canvas.height,iw=lb.img.naturalWidth,ih=lb.img.naturalHeight; if(!iw||!ih) return; lb.scale=Math.min(cw/iw,ch/ih)*0.92; lb.minScale=lb.scale; lb.ox=(cw-iw*lb.scale)/2; lb.oy=(ch-ih*lb.scale)/2; }
-function lbZoomAt(f,mx,my){ var ns=Math.min(lb.maxScale,Math.max(lb.minScale,lb.scale*f)); var r=ns/lb.scale; lb.ox=mx-(mx-lb.ox)*r; lb.oy=my-(my-lb.oy)*r; lb.scale=ns; lbDraw(); }
-function lbDraw(){ var c=lb.ctx; c.clearRect(0,0,lb.canvas.width,lb.canvas.height); c.drawImage(lb.img,lb.ox,lb.oy,lb.img.naturalWidth*lb.scale,lb.img.naturalHeight*lb.scale); }
-function openLightbox(idx){ imgIdx=idx; var el=document.getElementById('lightbox'); el.style.display='flex'; document.body.style.overflow='hidden'; if(!lb.canvas) lbInit(); lbResize(); lb.img.src=images[imgIdx]; document.getElementById('lb-counter').textContent=(imgIdx+1)+'/'+images.length; }
-function closeLightbox(){ document.getElementById('lightbox').style.display='none'; document.body.style.overflow=''; }
-window.addEventListener('resize',function(){ if(document.getElementById('lightbox').style.display!=='none'){lbFit();lbDraw();} });
-function downloadImg(idx){ if(!images[idx]) return; var a=document.createElement('a'); a.href=images[idx]; a.download='menu_'+(idx+1)+'.jpg'; a.click(); }
+function lbInit(){lb.canvas=document.getElementById('lb-canvas');lb.ctx=lb.canvas.getContext('2d');lb.img.onload=function(){lbFit();lbDraw();};lb.canvas.addEventListener('wheel',function(e){e.preventDefault();var r=lb.canvas.getBoundingClientRect();lbZoomAt(e.deltaY<0?1.12:1/1.12,e.clientX-r.left,e.clientY-r.top);},{passive:false});lb.canvas.addEventListener('mousedown',function(e){lb.dragging=true;lb.lastX=e.clientX;lb.lastY=e.clientY;lb.canvas.style.cursor='grabbing';});window.addEventListener('mousemove',function(e){if(!lb.dragging)return;lb.ox+=e.clientX-lb.lastX;lb.oy+=e.clientY-lb.lastY;lb.lastX=e.clientX;lb.lastY=e.clientY;lbDraw();});window.addEventListener('mouseup',function(){lb.dragging=false;lb.canvas.style.cursor='default';});lb.canvas.addEventListener('dblclick',function(e){var r=lb.canvas.getBoundingClientRect();if(Math.abs(lb.scale-lb.minScale)<0.01)lbZoomAt(2.5,e.clientX-r.left,e.clientY-r.top);else{lbFit();lbDraw();}});lb.canvas.addEventListener('touchstart',function(e){lb.touches=Array.from(e.touches);if(lb.touches.length===1){lb.dragging=true;lb.lastX=lb.touches[0].clientX;lb.lastY=lb.touches[0].clientY;}if(lb.touches.length===2)lb.lastDist=Math.hypot(lb.touches[0].clientX-lb.touches[1].clientX,lb.touches[0].clientY-lb.touches[1].clientY);},{passive:true});lb.canvas.addEventListener('touchmove',function(e){e.preventDefault();lb.touches=Array.from(e.touches);if(lb.touches.length===2){var dist=Math.hypot(lb.touches[0].clientX-lb.touches[1].clientX,lb.touches[0].clientY-lb.touches[1].clientY);var cx=(lb.touches[0].clientX+lb.touches[1].clientX)/2,cy=(lb.touches[0].clientY+lb.touches[1].clientY)/2,r=lb.canvas.getBoundingClientRect();lbZoomAt(dist/lb.lastDist,cx-r.left,cy-r.top);lb.lastDist=dist;}else if(lb.touches.length===1&&lb.dragging){lb.ox+=lb.touches[0].clientX-lb.lastX;lb.oy+=lb.touches[0].clientY-lb.lastY;lb.lastX=lb.touches[0].clientX;lb.lastY=lb.touches[0].clientY;lbDraw();}},{passive:false});lb.canvas.addEventListener('touchend',function(){lb.dragging=false;lb.lastDist=0;});}
+function lbResize(){lb.canvas.width=window.innerWidth;lb.canvas.height=window.innerHeight;}
+function lbFit(){lbResize();var cw=lb.canvas.width,ch=lb.canvas.height,iw=lb.img.naturalWidth,ih=lb.img.naturalHeight;if(!iw||!ih)return;lb.scale=Math.min(cw/iw,ch/ih)*0.92;lb.minScale=lb.scale;lb.ox=(cw-iw*lb.scale)/2;lb.oy=(ch-ih*lb.scale)/2;}
+function lbZoomAt(f,mx,my){var ns=Math.min(lb.maxScale,Math.max(lb.minScale,lb.scale*f));var r=ns/lb.scale;lb.ox=mx-(mx-lb.ox)*r;lb.oy=my-(my-lb.oy)*r;lb.scale=ns;lbDraw();}
+function lbDraw(){var c=lb.ctx;c.clearRect(0,0,lb.canvas.width,lb.canvas.height);c.drawImage(lb.img,lb.ox,lb.oy,lb.img.naturalWidth*lb.scale,lb.img.naturalHeight*lb.scale);}
+function openLightbox(idx){imgIdx=idx;var el=document.getElementById('lightbox');el.style.display='flex';document.body.style.overflow='hidden';if(!lb.canvas)lbInit();lbResize();lb.img.src=images[imgIdx];document.getElementById('lb-counter').textContent=(imgIdx+1)+'/'+images.length;}
+function closeLightbox(){document.getElementById('lightbox').style.display='none';document.body.style.overflow='';}
+window.addEventListener('resize',function(){if(document.getElementById('lightbox').style.display!=='none'){lbFit();lbDraw();}});
+function downloadImg(idx){if(!images[idx])return;var a=document.createElement('a');a.href=images[idx];a.download='menu_'+(idx+1)+'.jpg';a.click();}
 
-// ── 메모판 ──
 function initMemo(){
-  document.getElementById('memo-color-btns').addEventListener('click',function(e){ var btn=e.target.closest('[data-color]'); if(!btn) return; memoColor=btn.dataset.color; document.querySelectorAll('#memo-color-btns [data-color]').forEach(function(b){b.style.border='2px solid transparent';}); btn.style.border='3px solid #4f6ef7'; });
-  document.getElementById('memo-save-btn').onclick=function(){ var content=document.getElementById('memo-content').value.trim(); if(!content) return alert('내용을 입력해주세요.'); var board=document.getElementById('memo-board'),bw=board.offsetWidth; var x=Math.max(0,Math.min(memoClickX-80,bw-170)),y=Math.max(30,memoClickY-20); db.ref('memos').push({content:content,color:memoColor,x:x,y:y,author:myName,uid:cu.uid,ts:Date.now()}).then(function(){ document.getElementById('memo-modal').style.display='none'; }); };
-  document.getElementById('memo-cancel-btn').onclick=function(){ document.getElementById('memo-modal').style.display='none'; };
-  document.getElementById('memo-modal').onclick=function(e){ if(e.target===this) this.style.display='none'; };
-  document.getElementById('memo-board').addEventListener('click',function(e){ if(e.target.closest('.memo-note')||e.target.closest('.epicker')) return; var r=this.getBoundingClientRect(); memoClickX=e.clientX-r.left; memoClickY=e.clientY-r.top; document.getElementById('memo-content').value=''; document.getElementById('memo-modal').style.display='flex'; setTimeout(function(){ document.getElementById('memo-content').focus(); },100); });
-  document.getElementById('ep-tab-def').onclick=function(){ this.classList.add('active'); document.getElementById('ep-tab-custom').classList.remove('active'); document.getElementById('ep-grid-def').style.display='grid'; document.getElementById('ep-custom').style.display='none'; };
-  document.getElementById('ep-tab-custom').onclick=function(){ this.classList.add('active'); document.getElementById('ep-tab-def').classList.remove('active'); document.getElementById('ep-grid-def').style.display='none'; document.getElementById('ep-custom').style.display='block'; loadCustomEmojis(); };
-  document.getElementById('ep-grid-def').innerHTML=DEFAULT_EMOJIS.map(function(em){ return '<button class="epicker-btn" data-emoji="'+em+'">'+em+'</button>'; }).join('');
-  document.getElementById('ep-grid-def').addEventListener('click',function(e){ var btn=e.target.closest('.epicker-btn'); if(btn) doAddReaction(btn.dataset.emoji); });
-  document.getElementById('ep-upload-area').onclick=function(){ document.getElementById('ep-file').click(); };
-  document.getElementById('ep-file').onchange=function(){ uploadCustomEmoji(this); };
-  document.addEventListener('click',function(e){ var picker=document.getElementById('epicker'); if(!picker||picker.style.display==='none') return; if(!picker.contains(e.target)&&!e.target.classList.contains('reaction-add')) picker.style.display='none'; });
+  document.getElementById('memo-color-btns').addEventListener('click',function(e){var btn=e.target.closest('[data-color]');if(!btn)return;memoColor=btn.dataset.color;document.querySelectorAll('#memo-color-btns [data-color]').forEach(function(b){b.style.border='2px solid transparent';});btn.style.border='3px solid #4f6ef7';});
+  document.getElementById('memo-save-btn').onclick=function(){var content=document.getElementById('memo-content').value.trim();if(!content)return alert('내용을 입력해주세요.');var board=document.getElementById('memo-board'),bw=board.offsetWidth;var x=Math.max(0,Math.min(memoClickX-80,bw-170)),y=Math.max(30,memoClickY-20);db.ref('memos').push({content:content,color:memoColor,x:x,y:y,author:myName,uid:cu.uid,ts:Date.now()}).then(function(){document.getElementById('memo-modal').style.display='none';});};
+  document.getElementById('memo-cancel-btn').onclick=function(){document.getElementById('memo-modal').style.display='none';};
+  document.getElementById('memo-modal').onclick=function(e){if(e.target===this)this.style.display='none';};
+  document.getElementById('memo-board').addEventListener('click',function(e){if(e.target.closest('.memo-note')||e.target.closest('.epicker'))return;var r=this.getBoundingClientRect();memoClickX=e.clientX-r.left;memoClickY=e.clientY-r.top;document.getElementById('memo-content').value='';document.getElementById('memo-modal').style.display='flex';setTimeout(function(){document.getElementById('memo-content').focus();},100);});
+  document.getElementById('ep-tab-def').onclick=function(){this.classList.add('active');document.getElementById('ep-tab-custom').classList.remove('active');document.getElementById('ep-grid-def').style.display='grid';document.getElementById('ep-custom').style.display='none';};
+  document.getElementById('ep-tab-custom').onclick=function(){this.classList.add('active');document.getElementById('ep-tab-def').classList.remove('active');document.getElementById('ep-grid-def').style.display='none';document.getElementById('ep-custom').style.display='block';loadCustomEmojis();};
+  document.getElementById('ep-grid-def').innerHTML=DEFAULT_EMOJIS.map(function(em){return '<button class="epicker-btn" data-emoji="'+em+'">'+em+'</button>';}).join('');
+  document.getElementById('ep-grid-def').addEventListener('click',function(e){var btn=e.target.closest('.epicker-btn');if(btn)doAddReaction(btn.dataset.emoji);});
+  document.getElementById('ep-upload-area').onclick=function(){document.getElementById('ep-file').click();};
+  document.getElementById('ep-file').onchange=function(){uploadCustomEmoji(this);};
+  document.addEventListener('click',function(e){var picker=document.getElementById('epicker');if(!picker||picker.style.display==='none')return;if(!picker.contains(e.target)&&!e.target.classList.contains('reaction-add'))picker.style.display='none';});
 }
 
-function loadCustomEmojis(){ db.ref('customEmojis').get().then(function(snap){ var grid=document.getElementById('ep-grid-custom'); if(!snap.exists()){grid.innerHTML='<div style="color:#aaa;font-size:12px;padding:8px;grid-column:span 7">아직 없어요</div>';return;} grid.innerHTML=''; Object.entries(snap.val()).forEach(function(e){ var btn=document.createElement('button'); btn.className='epicker-btn'; btn.dataset.cname=e[0]; btn.innerHTML='<img src="'+e[1].url+'" style="width:22px;height:22px;object-fit:contain">'; btn.onclick=function(){ doAddReaction(':'+e[0]+':'); }; grid.appendChild(btn); }); }); }
-function uploadCustomEmoji(input){ var file=input.files[0]; if(!file) return; if(file.size>200*1024){alert('200KB 이하만 가능해요!');return;} var name=file.name.replace(/\.[^/.]+$/,'').replace(/[^a-zA-Z0-9가-힣_]/g,'_'); var reader=new FileReader(); reader.onload=function(e){ db.ref('customEmojis/'+name).set({url:e.target.result,uploadedBy:myName,ts:Date.now()}).then(function(){ loadCustomEmojis(); alert(':'+name+': 추가됐어요!'); }); }; reader.readAsDataURL(file); input.value=''; }
-
-function openEpicker(memoKey,btnEl){ curEmojiKey=memoKey; var picker=document.getElementById('epicker'); picker.style.display='block'; var board=document.getElementById('memo-board'),br=board.getBoundingClientRect(),btnR=btnEl.getBoundingClientRect(); var left=btnR.left-br.left-265,top=btnR.top-br.top-220; if(left<4) left=btnR.right-br.left+4; if(top<30) top=btnR.bottom-br.top+4; picker.style.left=Math.max(4,Math.min(left,br.width-270))+'px'; picker.style.top=Math.max(30,top)+'px'; }
-function doAddReaction(emoji){ if(!curEmojiKey) return; document.getElementById('epicker').style.display='none'; var safeKey=emoji.replace(/[^a-zA-Z0-9가-힣_:]/g,function(c){return '_x'+c.codePointAt(0).toString(16)+'_';}); var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_'); var path='memos/'+curEmojiKey+'/reactions/'+safeKey+'/'+uid; db.ref(path).get().then(function(snap){ if(snap.exists()) db.ref(path).remove(); else db.ref(path).set(myName); }); }
+function loadCustomEmojis(){db.ref('customEmojis').get().then(function(snap){var grid=document.getElementById('ep-grid-custom');if(!snap.exists()){grid.innerHTML='<div style="color:#aaa;font-size:12px;padding:8px;grid-column:span 7">아직 없어요</div>';return;}grid.innerHTML='';Object.entries(snap.val()).forEach(function(e){var btn=document.createElement('button');btn.className='epicker-btn';btn.dataset.cname=e[0];btn.innerHTML='<img src="'+e[1].url+'" style="width:22px;height:22px;object-fit:contain">';btn.onclick=function(){doAddReaction(':'+e[0]+':');};grid.appendChild(btn);});});}
+function uploadCustomEmoji(input){var file=input.files[0];if(!file)return;if(file.size>200*1024){alert('200KB 이하만 가능해요!');return;}var name=file.name.replace(/\.[^/.]+$/,'').replace(/[^a-zA-Z0-9가-힣_]/g,'_');var reader=new FileReader();reader.onload=function(e){db.ref('customEmojis/'+name).set({url:e.target.result,uploadedBy:myName,ts:Date.now()}).then(function(){loadCustomEmojis();alert(':'+name+': 추가됐어요!');});};reader.readAsDataURL(file);input.value='';}
+function openEpicker(memoKey,btnEl){curEmojiKey=memoKey;var picker=document.getElementById('epicker');picker.style.display='block';var board=document.getElementById('memo-board'),br=board.getBoundingClientRect(),btnR=btnEl.getBoundingClientRect();var left=btnR.left-br.left-265,top=btnR.top-br.top-220;if(left<4)left=btnR.right-br.left+4;if(top<30)top=btnR.bottom-br.top+4;picker.style.left=Math.max(4,Math.min(left,br.width-270))+'px';picker.style.top=Math.max(30,top)+'px';}
+function doAddReaction(emoji){if(!curEmojiKey)return;document.getElementById('epicker').style.display='none';var safeKey=emoji.replace(/[^a-zA-Z0-9가-힣_:]/g,function(c){return '_x'+c.codePointAt(0).toString(16)+'_';});var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');var path='memos/'+curEmojiKey+'/reactions/'+safeKey+'/'+uid;db.ref(path).get().then(function(snap){if(snap.exists())db.ref(path).remove();else db.ref(path).set(myName);});}
 
 function loadMemos(){
-  if(memoLis){ try{ db.ref('memos').off('value',memoLis); }catch(e){} memoLis=null; }
+  if(memoLis){try{db.ref('memos').off('value',memoLis);}catch(e){} memoLis=null;}
   var container=document.getElementById('memo-items');
   memoLis=db.ref('memos').on('value',function(snap){
-    container.innerHTML=''; if(!snap.exists()) return;
+    container.innerHTML='';if(!snap.exists())return;
     var board=document.getElementById('memo-board'),bh=600;
     Object.entries(snap.val()).forEach(function(entry){
-      var k=entry[0],m=entry[1]; if((m.y||0)+200>bh) bh=(m.y||0)+220;
+      var k=entry[0],m=entry[1];if((m.y||0)+200>bh)bh=(m.y||0)+220;
       var rhtml='';
       if(m.reactions){
         Object.entries(m.reactions).forEach(function(re){
-          var safeKey=re[0],users=re[1]; if(!users) return;
-          var cnt=Object.keys(users).length; if(!cnt) return;
-          var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_'), isMine=!!users[uid];
-          var emoji=safeKey.replace(/_x([0-9a-f]+)_/g,function(_,h){ try{return String.fromCodePoint(parseInt(h,16));}catch(e){return '';} });
+          var safeKey=re[0],users=re[1];if(!users)return;
+          var cnt=Object.keys(users).length;if(!cnt)return;
+          var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_'),isMine=!!users[uid];
+          var emoji=safeKey.replace(/_x([0-9a-f]+)_/g,function(_,h){try{return String.fromCodePoint(parseInt(h,16));}catch(e){return '';}});
           var isCustom=safeKey.startsWith(':')&&safeKey.endsWith(':');
           var display=isCustom?'<img data-cn="'+esc(safeKey.slice(1,-1))+'" style="width:14px;height:14px;vertical-align:middle">':emoji;
           var userNames=Object.values(users);
@@ -1116,33 +1098,33 @@ function loadMemos(){
         });
       }
       var div=document.createElement('div');
-      div.className='memo-note'; div.style.left=(m.x||0)+'px'; div.style.top=(m.y||30)+'px'; div.style.background=m.color||'#fef9c3'; div.style.position='absolute';
+      div.className='memo-note';div.style.left=(m.x||0)+'px';div.style.top=(m.y||30)+'px';div.style.background=m.color||'#fef9c3';div.style.position='absolute';
       div.innerHTML='<button class="memo-del">✕</button><div class="memo-author">📌 '+esc(m.author)+'</div><div style="font-size:13px;line-height:1.5;word-break:break-all;white-space:pre-wrap">'+esc(m.content)+'</div><div class="memo-reactions">'+rhtml+'<button class="reaction-add">+</button></div>';
-      div.querySelectorAll('img[data-cn]').forEach(function(img){ db.ref('customEmojis/'+img.dataset.cn).get().then(function(s){ if(s.exists()) img.src=s.val().url; }); });
-      div.querySelectorAll('img[data-cn2]').forEach(function(img){ db.ref('customEmojis/'+img.dataset.cn2).get().then(function(s){ if(s.exists()) img.src=s.val().url; }); });
-      div.querySelectorAll('.reaction-chip').forEach(function(chip){ chip.onclick=function(e){ e.stopPropagation(); curEmojiKey=k; doAddReaction(this.dataset.rkey); }; });
-      div.querySelector('.reaction-add').onclick=function(e){ e.stopPropagation(); openEpicker(k,this); };
-      div.querySelector('.memo-del').onclick=function(e){ e.stopPropagation(); if(m.uid===cu.uid||window.confirm('삭제하시겠습니까?')) db.ref('memos/'+k).remove(); };
+      div.querySelectorAll('img[data-cn]').forEach(function(img){db.ref('customEmojis/'+img.dataset.cn).get().then(function(s){if(s.exists())img.src=s.val().url;});});
+      div.querySelectorAll('img[data-cn2]').forEach(function(img){db.ref('customEmojis/'+img.dataset.cn2).get().then(function(s){if(s.exists())img.src=s.val().url;});});
+      div.querySelectorAll('.reaction-chip').forEach(function(chip){chip.onclick=function(e){e.stopPropagation();curEmojiKey=k;doAddReaction(this.dataset.rkey);};});
+      div.querySelector('.reaction-add').onclick=function(e){e.stopPropagation();openEpicker(k,this);};
+      div.querySelector('.memo-del').onclick=function(e){e.stopPropagation();if(m.uid===cu.uid||window.confirm('삭제하시겠습니까?'))db.ref('memos/'+k).remove();};
       var drag=false,ox=0,oy=0,moved=false;
-      div.addEventListener('mousedown',function(e){ if(e.target.classList.contains('memo-del')||e.target.classList.contains('reaction-add')||e.target.classList.contains('reaction-chip')) return; e.preventDefault(); e.stopPropagation(); drag=true; moved=false; var r=div.getBoundingClientRect(); ox=e.clientX-r.left; oy=e.clientY-r.top; div.style.cursor='grabbing'; div.style.zIndex='500'; });
-      function onMM(e){ if(!drag) return; moved=true; var br=board.getBoundingClientRect(); var nx=e.clientX-br.left-ox,ny=e.clientY-br.top-oy; nx=Math.max(0,Math.min(nx,br.width-170)); ny=Math.max(30,ny); div.style.left=nx+'px'; div.style.top=ny+'px'; }
-      function onMU(){ if(!drag) return; drag=false; div.style.cursor='grab'; div.style.zIndex=''; if(moved) db.ref('memos/'+k).update({x:parseFloat(div.style.left),y:parseFloat(div.style.top)}); }
-      document.addEventListener('mousemove',onMM); document.addEventListener('mouseup',onMU);
-      div.addEventListener('touchstart',function(e){ if(e.target.classList.contains('memo-del')||e.target.classList.contains('reaction-add')) return; drag=true; moved=false; var r=div.getBoundingClientRect(); ox=e.touches[0].clientX-r.left; oy=e.touches[0].clientY-r.top; div.style.zIndex='500'; },{passive:true});
-      div.addEventListener('touchmove',function(e){ if(!drag) return; moved=true; e.preventDefault(); var br=board.getBoundingClientRect(); var nx=e.touches[0].clientX-br.left-ox,ny=e.touches[0].clientY-br.top-oy; nx=Math.max(0,Math.min(nx,br.width-170)); ny=Math.max(30,ny); div.style.left=nx+'px'; div.style.top=ny+'px'; },{passive:false});
-      div.addEventListener('touchend',function(){ if(!drag) return; drag=false; div.style.zIndex=''; if(moved) db.ref('memos/'+k).update({x:parseFloat(div.style.left),y:parseFloat(div.style.top)}); });
-      container.appendChild(div); board.style.minHeight=bh+'px';
+      div.addEventListener('mousedown',function(e){if(e.target.classList.contains('memo-del')||e.target.classList.contains('reaction-add')||e.target.classList.contains('reaction-chip'))return;e.preventDefault();e.stopPropagation();drag=true;moved=false;var r=div.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;div.style.cursor='grabbing';div.style.zIndex='500';});
+      function onMM(e){if(!drag)return;moved=true;var br=board.getBoundingClientRect();var nx=e.clientX-br.left-ox,ny=e.clientY-br.top-oy;nx=Math.max(0,Math.min(nx,br.width-170));ny=Math.max(30,ny);div.style.left=nx+'px';div.style.top=ny+'px';}
+      function onMU(){if(!drag)return;drag=false;div.style.cursor='grab';div.style.zIndex='';if(moved)db.ref('memos/'+k).update({x:parseFloat(div.style.left),y:parseFloat(div.style.top)});}
+      document.addEventListener('mousemove',onMM);document.addEventListener('mouseup',onMU);
+      div.addEventListener('touchstart',function(e){if(e.target.classList.contains('memo-del')||e.target.classList.contains('reaction-add'))return;drag=true;moved=false;var r=div.getBoundingClientRect();ox=e.touches[0].clientX-r.left;oy=e.touches[0].clientY-r.top;div.style.zIndex='500';},{passive:true});
+      div.addEventListener('touchmove',function(e){if(!drag)return;moved=true;e.preventDefault();var br=board.getBoundingClientRect();var nx=e.touches[0].clientX-br.left-ox,ny=e.touches[0].clientY-br.top-oy;nx=Math.max(0,Math.min(nx,br.width-170));ny=Math.max(30,ny);div.style.left=nx+'px';div.style.top=ny+'px';},{passive:false});
+      div.addEventListener('touchend',function(){if(!drag)return;drag=false;div.style.zIndex='';if(moved)db.ref('memos/'+k).update({x:parseFloat(div.style.left),y:parseFloat(div.style.top)});});
+      container.appendChild(div);board.style.minHeight=bh+'px';
     });
   });
 }
 
 function stopAll(){
   stopPresence();
-  if(roomLis&&myCode){ try{db.ref('rooms/'+myCode).off('value',roomLis);}catch(e){} roomLis=null; }
-  if(chatLis&&myCode){ try{db.ref('rooms/'+myCode+'/chat').off('value',chatLis);}catch(e){} chatLis=null; }
-  if(memoLis){ try{db.ref('memos').off('value',memoLis);}catch(e){} memoLis=null; }
-  if(pollTmr){ clearInterval(pollTmr); pollTmr=null; }
-  if(rankTmr){ clearInterval(rankTmr); rankTmr=null; }
+  if(roomLis&&myCode){try{db.ref('rooms/'+myCode).off('value',roomLis);}catch(e){} roomLis=null;}
+  if(chatLis&&myCode){try{db.ref('rooms/'+myCode+'/chat').off('value',chatLis);}catch(e){} chatLis=null;}
+  if(memoLis){try{db.ref('memos').off('value',memoLis);}catch(e){} memoLis=null;}
+  if(pollTmr){clearInterval(pollTmr);pollTmr=null;}
+  if(rankTmr){clearInterval(rankTmr);rankTmr=null;}
   lastChatLen='';
 }
 </script>
