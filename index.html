@@ -142,7 +142,12 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 #tab-roulette-content{display:none}
 .roulette-wrap{display:grid;grid-template-columns:1fr 300px;gap:16px}
 @media(max-width:700px){.roulette-wrap{grid-template-columns:1fr}}
-.r-store-panel{background:#fff;border-radius:16px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,.08);display:flex;flex-direction:column;max-height:580px}
+.user-chip{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600}
+.user-chip.online{background:#e8f5e9;color:#2e7d32}
+.user-chip.offline{background:#f5f5f5;color:#aaa}
+.online-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.online-dot.on{background:#43a047;box-shadow:0 0 0 2px #c8e6c9}
+.online-dot.off{background:#ccc}background:#fff;border-radius:16px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,.08);display:flex;flex-direction:column;max-height:580px}
 .r-search{width:100%;padding:9px 12px;border:1.5px solid #dde1f0;border-radius:10px;font-size:14px;outline:none;margin-bottom:10px}
 .r-search:focus{border-color:#4f6ef7}
 .r-store-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
@@ -243,7 +248,13 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
         <button class="tab-btn" id="tab-memo" data-tab="memo" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">📌 메모판</button>
         <button class="tab-btn" id="tab-roulette" data-tab="roulette" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">🎡 룰렛</button>
       </div>
-      <div id="tab-public-content"><div id="public-rooms-list"><div style="color:#aaa;text-align:center;padding:30px">불러오는 중...</div></div></div>
+      <div id="tab-public-content">
+        <div id="online-users-panel" class="card" style="margin-bottom:16px;padding:16px">
+          <div style="font-weight:700;font-size:15px;margin-bottom:10px">👥 접속 현황 <span id="online-count" style="font-size:12px;font-weight:400;color:#aaa"></span></div>
+          <div id="online-users-list" style="display:flex;flex-wrap:wrap;gap:8px"><div style="color:#aaa;font-size:13px">불러오는 중...</div></div>
+        </div>
+        <div id="public-rooms-list"><div style="color:#aaa;text-align:center;padding:30px">불러오는 중...</div></div>
+      </div>
       <div id="tab-private-content" style="display:none">
         <div class="card">
           <div style="font-weight:700;font-size:16px;margin-bottom:14px">🔒 비밀 방 코드로 입장</div>
@@ -545,7 +556,49 @@ var ROULETTE_STORES=['GTS버거','고돼지','고봉민김밥','교동홀도시�
 var RCOLORS=['#534AB7','#1D9E75','#D85A30','#185FA5','#D4537E','#639922','#BA7517','#A32D2D','#3C3489','#0F6E56','#993C1D','#0C447C','#993556','#3B6D11','#854F0B','#4f6ef7','#e53935','#ff7043'];
 var rSelected=[],rAngle=0,rSpinning=false,rRaf=null,rConfettiArr=[],rConfRaf=null,rConfActive=false;
 
-function rInitStoreList(){
+var presenceRef=null,presenceTmr=null;
+
+function startPresence(){
+  if(!cu||!db)return;
+  var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
+  var ref=db.ref('presence/'+uid);
+  presenceRef=ref;
+  var data={name:myName,online:true,lastSeen:Date.now()};
+  ref.set(data);
+  ref.onDisconnect().update({online:false,lastSeen:Date.now()});
+  // 30초마다 heartbeat
+  if(presenceTmr)clearInterval(presenceTmr);
+  presenceTmr=setInterval(function(){ref.update({lastSeen:Date.now()});},30000);
+  loadOnlineUsers();
+}
+
+function stopPresence(){
+  if(presenceRef){presenceRef.update({online:false,lastSeen:Date.now()});presenceRef=null;}
+  if(presenceTmr){clearInterval(presenceTmr);presenceTmr=null;}
+}
+
+async function loadOnlineUsers(){
+  var snap=await db.ref('presence').get();
+  var el=document.getElementById('online-users-list');
+  var cntEl=document.getElementById('online-count');
+  if(!snap.exists()){el.innerHTML='<div style="color:#aaa;font-size:13px">아직 아무도 없어요</div>';return;}
+  var now=Date.now();
+  var users=Object.values(snap.val()).filter(function(u){return u.name;});
+  // 5분 이내 lastSeen이면 온라인 간주
+  users.forEach(function(u){u._on=u.online&&(now-(u.lastSeen||0))<5*60*1000;});
+  // 온라인 먼저 정렬
+  users.sort(function(a,b){return (b._on?1:0)-(a._on?1:0);});
+  var onCnt=users.filter(function(u){return u._on;}).length;
+  cntEl.textContent='(온라인 '+onCnt+'명 / 전체 '+users.length+'명)';
+  el.innerHTML=users.map(function(u){
+    var initial=(u.name||'?').charAt(0).toUpperCase();
+    return '<div class="user-chip '+(u._on?'online':'offline')+'">'
+      +'<div class="online-dot '+(u._on?'on':'off')+'"></div>'
+      +'<div style="width:24px;height:24px;border-radius:50%;background:'+(u._on?'#43a047':'#bbb')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+initial+'</div>'
+      +u.name
+      +'</div>';
+  }).join('');
+}
   document.getElementById('r-search').oninput=rFilterStores;
   rRenderStoreList(ROULETTE_STORES);
 }
@@ -689,7 +742,14 @@ document.addEventListener('DOMContentLoaded',function(){
 
 function updateNav(){document.getElementById('nav-avatar').textContent=myName.charAt(0).toUpperCase();document.getElementById('nav-name').textContent=myName;document.getElementById('nav-email').textContent=cu&&cu.email||'';}
 
-function showRooms(){updateNav();setScreen('s-rooms');stopAll();loadPublicRooms();loadRanking();loadStoreRanking();pollTmr=setInterval(loadPublicRooms,4000);rankTmr=setInterval(function(){loadRanking();loadStoreRanking();},10000);var now=new Date();document.getElementById('rank-month').textContent=now.getFullYear()+'년 '+(now.getMonth()+1)+'월';}
+function showRooms(){
+  updateNav();setScreen('s-rooms');stopAll();
+  loadPublicRooms();loadRanking();loadStoreRanking();
+  startPresence();
+  pollTmr=setInterval(function(){loadPublicRooms();loadOnlineUsers();},4000);
+  rankTmr=setInterval(function(){loadRanking();loadStoreRanking();},10000);
+  var now=new Date();document.getElementById('rank-month').textContent=now.getFullYear()+'년 '+(now.getMonth()+1)+'월';
+}
 
 function switchTab(tab){
   currentTab=tab;
@@ -1125,6 +1185,7 @@ function loadMemos(){
 }
 
 function stopAll(){
+  stopPresence();
   if(roomLis&&myCode){try{db.ref('rooms/'+myCode).off('value',roomLis);}catch(e){} roomLis=null;}
   if(chatLis&&myCode){try{db.ref('rooms/'+myCode+'/chat').off('value',chatLis);}catch(e){} chatLis=null;}
   if(memoLis){try{db.ref('memos').off('value',memoLis);}catch(e){} memoLis=null;}
