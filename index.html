@@ -720,10 +720,14 @@ document.addEventListener('DOMContentLoaded',function(){
 
 function updateNav(){
   var avatarEl=document.getElementById('nav-avatar');
-  if(cu&&cu.photoURL){
-    avatarEl.innerHTML='<img src="'+cu.photoURL+'" style="width:34px;height:34px;border-radius:50%;object-fit:cover;display:block">';
-    avatarEl.textContent='';
+  var photoURL=cu&&cu.photoURL?cu.photoURL:'';
+  if(photoURL){
+    avatarEl.style.background='transparent';
+    avatarEl.style.padding='0';
+    avatarEl.style.overflow='hidden';
+    avatarEl.innerHTML='<img src="'+photoURL+'" referrerpolicy="no-referrer" crossorigin="anonymous" style="width:34px;height:34px;border-radius:50%;object-fit:cover;display:block" onerror="this.parentElement.innerHTML=\''+myName.charAt(0).toUpperCase()+'\';this.parentElement.style.background=\'#4f6ef7\';">';
   }else{
+    avatarEl.style.background='#4f6ef7';
     avatarEl.innerHTML='';
     avatarEl.textContent=myName.charAt(0).toUpperCase();
   }
