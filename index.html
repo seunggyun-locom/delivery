@@ -552,8 +552,8 @@ function startPresence(){
     var uid=cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
     var ref=db.ref('presence/'+uid);
     presenceRef=ref;
-    db.ref('users/'+uid).set({name:myName,uid:uid}).catch(function(){});
-    ref.set({name:myName,online:true,lastSeen:Date.now()}).catch(function(){});
+    db.ref('users/'+uid).set({name:myName,uid:uid,photoURL:cu.photoURL||''}).catch(function(){});
+    ref.set({name:myName,online:true,lastSeen:Date.now(),photoURL:cu.photoURL||''}).catch(function(){});
     ref.onDisconnect().update({online:false,lastSeen:Date.now()}).catch(function(){});
     if(presenceTmr)clearInterval(presenceTmr);
     presenceTmr=setInterval(function(){ref.update({lastSeen:Date.now()}).catch(function(){});},30000);
@@ -576,16 +576,19 @@ function loadOnlineUsers(){
     var presMap=presSnap.exists()?presSnap.val():{};
     var users=Object.entries(usersSnap.val()).map(function(e){
       var uid=e[0],u=e[1],p=presMap[uid]||{};
-      return {name:u.name,online:p.online&&(now-(p.lastSeen||0))<5*60*1000};
+      return {name:u.name,photoURL:u.photoURL||p.photoURL||'',online:p.online&&(now-(p.lastSeen||0))<5*60*1000};
     });
     users.sort(function(a,b){return (b.online?1:0)-(a.online?1:0);});
     var onCnt=users.filter(function(u){return u.online;}).length;
     if(cntEl)cntEl.textContent='(온라인 '+onCnt+'명 / 전체 '+users.length+'명)';
     el.innerHTML=users.map(function(u){
       var initial=(u.name||'?').charAt(0).toUpperCase();
+      var avatarHtml=u.photoURL
+        ?'<img src="'+esc(u.photoURL)+'" referrerpolicy="no-referrer" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.outerHTML=\'<div style=&quot;width:24px;height:24px;border-radius:50%;background:'+(u.online?'#43a047':'#bbb')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0&quot;>'+initial+'</div>\'">'
+        :'<div style="width:24px;height:24px;border-radius:50%;background:'+(u.online?'#43a047':'#bbb')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+initial+'</div>';
       return '<div class="user-chip '+(u.online?'online':'offline')+'">'
         +'<div class="online-dot '+(u.online?'on':'off')+'"></div>'
-        +'<div style="width:24px;height:24px;border-radius:50%;background:'+(u.online?'#43a047':'#bbb')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+initial+'</div>'
+        +avatarHtml
         +esc(u.name)+'</div>';
     }).join('');
   }).catch(function(e){console.warn('loadOnlineUsers err',e);});
