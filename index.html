@@ -729,23 +729,39 @@ document.addEventListener('DOMContentLoaded',function(){
   rDrawWheel();
   document.getElementById('rank-tab-amount').classList.add('active');
 
-  auth.onAuthStateChanged(async function(user){
-    if(user){cu=user;myName=user.displayName||user.email.split('@')[0];updateNav();loadSession();
-      if(myCode&&myRole){var s=await db.ref('rooms/'+myCode).get();if(s.exists()){stopAll();startRoom(myCode,myRole,s.val().type||'public');return;}clearSession();}
-      showRooms();
-    }else{cu=null;myName='';stopAll();setScreen('s-auth');}
+  auth.onAuthStateChanged(function(user){
+    if(user){
+      cu=user;myName=user.displayName||user.email.split('@')[0];
+      updateNav();
+      try{loadSession();}catch(e){}
+      if(myCode&&myRole){
+        db.ref('rooms/'+myCode).get().then(function(s){
+          if(s.exists()){stopAll();startRoom(myCode,myRole,s.val().type||'public');}
+          else{clearSession();showRooms();}
+        }).catch(function(){clearSession();showRooms();});
+      }else{
+        showRooms();
+      }
+    }else{
+      cu=null;myName='';stopAll();setScreen('s-auth');
+    }
   });
 });
 
 function updateNav(){document.getElementById('nav-avatar').textContent=myName.charAt(0).toUpperCase();document.getElementById('nav-name').textContent=myName;document.getElementById('nav-email').textContent=cu&&cu.email||'';}
 
 function showRooms(){
-  updateNav();setScreen('s-rooms');stopAll();
-  loadPublicRooms();loadRanking();loadStoreRanking();
-  startPresence();
+  updateNav();
+  setScreen('s-rooms');
+  stopAll();
+  loadPublicRooms();
+  loadRanking();
+  loadStoreRanking();
   pollTmr=setInterval(function(){loadPublicRooms();loadOnlineUsers();},4000);
   rankTmr=setInterval(function(){loadRanking();loadStoreRanking();},10000);
-  var now=new Date();document.getElementById('rank-month').textContent=now.getFullYear()+'년 '+(now.getMonth()+1)+'월';
+  var now=new Date();
+  document.getElementById('rank-month').textContent=now.getFullYear()+'년 '+(now.getMonth()+1)+'월';
+  setTimeout(function(){try{startPresence();}catch(e){console.warn('presence err',e);}},500);
 }
 
 function switchTab(tab){
