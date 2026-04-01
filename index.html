@@ -238,6 +238,15 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
       <div id="tab-public-content">
         <div id="public-rooms-list"><div style="color:#aaa;text-align:center;padding:30px">불러오는 중...</div></div>
       </div>
+      <div style="display:flex;background:#e8edff;border-radius:12px;padding:4px;margin-bottom:16px">
+        <button class="tab-btn active" id="tab-pub" data-tab="public" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:#4f6ef7;color:#fff">🌐 자유참여</button>
+        <button class="tab-btn" id="tab-priv" data-tab="private" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">🔒 비밀방</button>
+        <button class="tab-btn" id="tab-memo" data-tab="memo" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">📌 메모판</button>
+        <button class="tab-btn" id="tab-roulette" data-tab="roulette" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">🎡 룰렛</button>
+      </div>
+      <div id="tab-public-content">
+        <div id="public-rooms-list"><div style="color:#aaa;text-align:center;padding:30px">불러오는 중...</div></div>
+      </div>
       <div id="tab-private-content" style="display:none">
         <div class="card">
           <div style="font-weight:700;font-size:16px;margin-bottom:14px">🔒 비밀 방 코드로 입장</div>
@@ -286,10 +295,6 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
       </div>
     </div>
     <div>
-      <div class="ranking-card" style="margin-bottom:16px;padding:16px">
-        <div style="font-weight:700;font-size:15px;margin-bottom:10px">👥 접속 현황 <span id="online-count" style="font-size:12px;font-weight:400;color:#aaa"></span></div>
-        <div id="online-users-list" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto"><div style="color:#aaa;font-size:13px">불러오는 중...</div></div>
-      </div>
       <div class="ranking-card" style="margin-bottom:16px">
         <div style="font-weight:800;font-size:17px;margin-bottom:14px">🏆 이달의 배달 랭킹</div>
         <div class="rank-tabs">
@@ -305,8 +310,8 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
         <div id="store-rank-list"><div style="color:#aaa;text-align:center;padding:16px;font-size:14px">집계 중...</div></div>
       </div>
     </div>
-  </div>
-</div>
+    </div>
+    <!-- 오른쪽 랭킹 -->
 
 <div id="create-modal" class="modal-bg">
   <div class="modal-box">
@@ -560,6 +565,8 @@ function startPresence() {
     var uid = cu.uid.replace(/[^a-zA-Z0-9]/g,'_');
     var ref = db.ref('presence/'+uid);
     presenceRef = ref;
+    // 유저 목록에도 등록 (한 번도 안 뜨는 문제 해결)
+    db.ref('users/'+uid).set({name:myName, uid:uid}).catch(function(){});
     ref.set({name:myName, online:true, lastSeen:Date.now()}).catch(function(){});
     ref.onDisconnect().update({online:false, lastSeen:Date.now()}).catch(function(){});
     if(presenceTmr) clearInterval(presenceTmr);
@@ -575,22 +582,32 @@ function stopPresence() {
 
 function loadOnlineUsers() {
   if(!db) return;
-  db.ref('presence').get().then(function(snap){
+  // 전체 유저 목록 + presence 합쳐서 표시
+  Promise.all([
+    db.ref('users').get(),
+    db.ref('presence').get()
+  ]).then(function(results){
+    var usersSnap = results[0], presSnap = results[1];
     var el = document.getElementById('online-users-list');
     var cntEl = document.getElementById('online-count');
     if(!el) return;
-    if(!snap.exists()){ el.innerHTML='<div style="color:#aaa;font-size:13px">아직 아무도 없어요</div>'; return; }
+    if(!usersSnap.exists()){ el.innerHTML='<div style="color:#aaa;font-size:13px">아직 아무도 없어요</div>'; return; }
     var now = Date.now();
-    var users = Object.values(snap.val()).filter(function(u){ return u.name; });
-    users.forEach(function(u){ u._on = u.online && (now-(u.lastSeen||0)) < 5*60*1000; });
-    users.sort(function(a,b){ return (b._on?1:0)-(a._on?1:0); });
-    var onCnt = users.filter(function(u){ return u._on; }).length;
+    var presMap = presSnap.exists() ? presSnap.val() : {};
+    var users = Object.entries(usersSnap.val()).map(function(e){
+      var uid = e[0], u = e[1];
+      var p = presMap[uid] || {};
+      var isOn = p.online && (now - (p.lastSeen||0)) < 5*60*1000;
+      return {name: u.name, online: isOn};
+    });
+    users.sort(function(a,b){ return (b.online?1:0)-(a.online?1:0); });
+    var onCnt = users.filter(function(u){ return u.online; }).length;
     if(cntEl) cntEl.textContent = '(온라인 '+onCnt+'명 / 전체 '+users.length+'명)';
     el.innerHTML = users.map(function(u){
       var initial = (u.name||'?').charAt(0).toUpperCase();
-      return '<div class="user-chip '+(u._on?'online':'offline')+'">'
-        +'<div class="online-dot '+(u._on?'on':'off')+'"></div>'
-        +'<div style="width:24px;height:24px;border-radius:50%;background:'+(u._on?'#43a047':'#bbb')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+initial+'</div>'
+      return '<div class="user-chip '+(u.online?'online':'offline')+'">'
+        +'<div class="online-dot '+(u.online?'on':'off')+'"></div>'
+        +'<div style="width:24px;height:24px;border-radius:50%;background:'+(u.online?'#43a047':'#bbb')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+initial+'</div>'
         +esc(u.name)+'</div>';
     }).join('');
   }).catch(function(e){ console.warn('loadOnlineUsers err',e); });
