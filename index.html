@@ -609,15 +609,17 @@ function getAiRecommend(){
     +ROULETTE_STORES.join(', ')
     +'\n\n반드시 JSON 배열로만 응답해. 다른 설명 없이 아래 형식으로만:\n'
     +'[{"rank":1,"store":"가게명","menu":"추천 메뉴","reason":"추천 이유 1줄","emoji":"음식 이모지"},{"rank":2,"store":"...","menu":"...","reason":"...","emoji":"..."},{"rank":3,"store":"...","menu":"...","reason":"...","emoji":"..."}]';
+
   document.getElementById('ai-rec-btn').disabled=true;
   document.getElementById('ai-rec-loading').style.display='block';
   document.getElementById('ai-rec-result').style.display='none';
-  fetch('https://api.anthropic.com/v1/messages',{
+
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+GEMINI_KEY,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
   }).then(function(r){return r.json();}).then(function(data){
-    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    var text=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)||'';
     var clean=text.replace(/```json|```/g,'').trim();
     var items=JSON.parse(clean);
     var html=items.map(function(it){
