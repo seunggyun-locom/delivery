@@ -620,8 +620,10 @@ function getAiRecommend(){
     body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
   }).then(function(r){return r.json();}).then(function(data){
     var text=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)||'';
-    var clean=text.replace(/```json|```/g,'').trim();
-    var items=JSON.parse(clean);
+    // JSON 배열 부분만 추출
+    var match=text.match(/\[[\s\S]*\]/);
+    if(!match){throw new Error('AI 응답 파싱 실패: '+text.slice(0,100));}
+    var items=JSON.parse(match[0]);
     var html=items.map(function(it){
       return '<div class="ai-rec-card">'
         +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
