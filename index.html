@@ -164,7 +164,11 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
 @keyframes glow{from{box-shadow:0 4px 15px rgba(229,57,53,.4)}to{box-shadow:0 4px 30px rgba(229,57,53,.8)}}
 .r-result-close{margin-top:20px;display:block;width:100%;padding:12px;border:2px solid #eee;border-radius:12px;background:#fff;color:#888;font-size:14px;font-weight:600;cursor:pointer}
 #r-confetti{position:fixed;inset:0;pointer-events:none;z-index:8999}
-.user-chip{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600}
+.ai-tag-btn{padding:6px 12px;border:1.5px solid #dde1f0;border-radius:20px;background:#fff;color:#555;font-size:13px;cursor:pointer;transition:all .15s;font-family:inherit}
+.ai-tag-btn.sel{border-color:#7c3aed;background:#f3e8ff;color:#7c3aed;font-weight:600}
+.ai-rec-card{background:#fff;border-radius:14px;padding:18px;margin-bottom:10px;border:1.5px solid #e8edff;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.ai-rec-rank{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f6ef7);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
+display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600}
 .user-chip.online{background:#e8f5e9;color:#2e7d32}
 .user-chip.offline{background:#f5f5f5;color:#aaa}
 .online-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -234,6 +238,7 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
         <button class="tab-btn" id="tab-priv" data-tab="private" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">🔒 비밀방</button>
         <button class="tab-btn" id="tab-memo" data-tab="memo" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">📌 메모판</button>
         <button class="tab-btn" id="tab-roulette" data-tab="roulette" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">🎡 룰렛</button>
+        <button class="tab-btn" id="tab-ai" data-tab="ai" style="flex:1;padding:9px;border:none;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;background:transparent;color:#4f6ef7">🤖 AI추천</button>
       </div>
       <div id="tab-public-content">
         <div id="public-rooms-list"><div style="color:#aaa;text-align:center;padding:30px">불러오는 중...</div></div>
@@ -266,7 +271,47 @@ hr{border:none;border-top:1.5px solid #f0f0f0;margin:16px 0}
           </div>
         </div>
       </div>
-      <div id="tab-roulette-content" style="display:none">
+      <div id="tab-ai-content" style="display:none">
+        <div class="card">
+          <div style="font-weight:700;font-size:17px;margin-bottom:6px">🤖 AI 메뉴 추천</div>
+          <div style="font-size:13px;color:#888;margin-bottom:16px">오늘 뭐 먹을지 모르겠을 때! AI한테 물어보세요 😋</div>
+          <div style="margin-bottom:12px">
+            <label>인원수</label>
+            <input type="number" id="ai-rec-people" placeholder="예: 5" min="1" max="50" value="1">
+          </div>
+          <div style="margin-bottom:12px">
+            <label>예산 (1인당, 선택)</label>
+            <input type="number" id="ai-rec-budget" placeholder="예: 10000" min="0">
+          </div>
+          <div style="margin-bottom:12px">
+            <label>원하는 음식 스타일 (선택)</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px" id="ai-rec-tags">
+              <button class="ai-tag-btn" data-tag="한식">🍚 한식</button>
+              <button class="ai-tag-btn" data-tag="중식">🥢 중식</button>
+              <button class="ai-tag-btn" data-tag="일식">🍣 일식</button>
+              <button class="ai-tag-btn" data-tag="양식">🍝 양식</button>
+              <button class="ai-tag-btn" data-tag="분식">🍢 분식</button>
+              <button class="ai-tag-btn" data-tag="샐러드">🥗 샐러드</button>
+              <button class="ai-tag-btn" data-tag="버거">🍔 버거</button>
+              <button class="ai-tag-btn" data-tag="피자">🍕 피자</button>
+              <button class="ai-tag-btn" data-tag="치킨">🍗 치킨</button>
+              <button class="ai-tag-btn" data-tag="자극적인">🌶️ 자극적</button>
+              <button class="ai-tag-btn" data-tag="가볍게">🥙 가볍게</button>
+              <button class="ai-tag-btn" data-tag="든든하게">💪 든든하게</button>
+            </div>
+          </div>
+          <div style="margin-bottom:16px">
+            <label>추가 요청사항 (선택)</label>
+            <input id="ai-rec-extra" placeholder="예: 매운 거 싫어요, 채식 가능한 거로">
+          </div>
+          <button onclick="getAiRecommend()" style="width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#4f6ef7);color:#fff;font-size:15px;font-weight:700;cursor:pointer" id="ai-rec-btn">✨ AI 추천 받기</button>
+        </div>
+        <div id="ai-rec-loading" style="display:none;text-align:center;padding:30px">
+          <div style="font-size:40px;margin-bottom:10px;animation:bounce 0.8s infinite alternate">🤖</div>
+          <div style="font-weight:600;color:#7c3aed;font-size:15px">AI가 메뉴를 고르는 중...</div>
+        </div>
+        <div id="ai-rec-result" style="display:none"></div>
+      </div>
         <div class="roulette-wrap">
           <div class="r-store-panel">
             <div style="font-weight:700;font-size:16px;margin-bottom:10px">🍽️ 가게 목록 <span style="font-size:12px;font-weight:400;color:#aaa">클릭하면 룰렛에 추가</span></div>
@@ -595,7 +640,60 @@ function loadOnlineUsers(){
   }).catch(function(e){console.warn('loadOnlineUsers err',e);});
 }
 
-function rInitStoreList(){document.getElementById('r-search').oninput=rFilterStores;rRenderStoreList(ROULETTE_STORES);}
+var aiRecTags=[];
+
+function getAiRecommend(){
+  var people=parseInt(document.getElementById('ai-rec-people').value)||1;
+  var budget=document.getElementById('ai-rec-budget').value.trim();
+  var extra=document.getElementById('ai-rec-extra').value.trim();
+  var prompt='우리 회사 로컴(서울 소재) 직원들이 배달음식을 주문하려고 해. 아래 조건에 맞는 가게 또는 메뉴를 3가지 추천해줘.\n\n'
+    +'- 인원수: '+people+'명\n'
+    +(budget?'- 1인당 예산: '+Number(budget).toLocaleString()+'원 이하\n':'')
+    +(aiRecTags.length?'- 원하는 스타일: '+aiRecTags.join(', ')+'\n':'')
+    +(extra?'- 추가 요청: '+extra+'\n':'')
+    +'\n다음 가게 목록 중에서 골라줘 (없으면 일반적인 배달 메뉴 추천해도 됨):\n'
+    +ROULETTE_STORES.join(', ')
+    +'\n\n반드시 JSON 배열로만 응답해. 다른 설명 없이 아래 형식으로만:\n'
+    +'[{"rank":1,"store":"가게명","menu":"추천 메뉴","reason":"추천 이유 1줄","emoji":"음식 이모지"},{"rank":2,...},{"rank":3,...}]';
+
+  document.getElementById('ai-rec-btn').disabled=true;
+  document.getElementById('ai-rec-loading').style.display='block';
+  document.getElementById('ai-rec-result').style.display='none';
+
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      messages:[{role:'user',content:prompt}]
+    })
+  }).then(function(r){return r.json();}).then(function(data){
+    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    var clean=text.replace(/```json|```/g,'').trim();
+    var items=JSON.parse(clean);
+    var html=items.map(function(it){
+      return '<div class="ai-rec-card">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<div class="ai-rec-rank">'+it.rank+'</div>'
+        +'<div style="font-size:26px">'+it.emoji+'</div>'
+        +'<div><div style="font-weight:700;font-size:15px;color:#1a1a2e">'+esc(it.store)+'</div>'
+        +'<div style="font-size:13px;color:#7c3aed;font-weight:600">'+esc(it.menu)+'</div></div>'
+        +'</div>'
+        +'<div style="font-size:13px;color:#555;background:#f8f0ff;border-radius:8px;padding:8px 12px">💬 '+esc(it.reason)+'</div>'
+        +'</div>';
+    }).join('');
+    document.getElementById('ai-rec-result').innerHTML=html;
+    document.getElementById('ai-rec-result').style.display='block';
+  }).catch(function(e){
+    document.getElementById('ai-rec-result').innerHTML='<div class="card" style="text-align:center;color:#e53935">⚠️ 추천 실패: '+esc(e.message)+'</div>';
+    document.getElementById('ai-rec-result').style.display='block';
+  }).finally(function(){
+    document.getElementById('ai-rec-loading').style.display='none';
+    document.getElementById('ai-rec-btn').disabled=false;
+  });
+}
+document.getElementById('r-search').oninput=rFilterStores;rRenderStoreList(ROULETTE_STORES);}
 function rFilterStores(){var q=document.getElementById('r-search').value.trim().toLowerCase();rRenderStoreList(q?ROULETTE_STORES.filter(function(s){return s.toLowerCase().includes(q);}):ROULETTE_STORES);}
 function rRenderStoreList(list){document.getElementById('r-store-list').innerHTML=list.map(function(s){var added=rSelected.includes(s);return '<button class="r-store-btn'+(added?' r-added':'')+'" onclick="rToggleStore(\''+s+'\')">'+s+(added?' ✓':'')+'</button>';}).join('');}
 function rToggleStore(s){if(rSelected.includes(s))rSelected=rSelected.filter(function(x){return x!==s;});else rSelected.push(s);rUpdate();rFilterStores();}
@@ -751,9 +849,9 @@ function showRooms(){
 
 function switchTab(tab){
   currentTab=tab;
-  ['public','private','memo','roulette'].forEach(function(t){
+  ['public','private','memo','roulette','ai'].forEach(function(t){
     document.getElementById('tab-'+t+'-content').style.display=t===tab?'block':'none';
-    var btnId=t==='public'?'tab-pub':t==='private'?'tab-priv':t==='memo'?'tab-memo':'tab-roulette';
+    var btnId=t==='public'?'tab-pub':t==='private'?'tab-priv':t==='memo'?'tab-memo':t==='roulette'?'tab-roulette':'tab-ai';
     var btn=document.getElementById(btnId);
     if(btn){btn.style.background=t===tab?'#4f6ef7':'transparent';btn.style.color=t===tab?'#fff':'#4f6ef7';}
   });
